@@ -24,8 +24,7 @@ env = gym.make('HumanoidBulletEnv-v0')
 policy_kwargs = dict(activation_fn=th.nn.ReLU,
                      net_arch=[dict(pi=[256,256,256,256], vf=[256,256,256,256])])
 model = PPO('MlpPolicy', env, verbose=0, policy_kwargs=policy_kwargs, tensorboard_log=log_path)
-model.learn(total_timesteps=2000)
-# model.learn(total_timesteps=20000000)
+model.learn(total_timesteps=30000000)
 
 # Test saving and loading
 model.save(f"{d}/humanoid_l{v}")
