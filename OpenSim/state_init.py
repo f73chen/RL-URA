@@ -13,4 +13,4 @@ env.ref_state_init(params)
 for i in range(50):
     o, r, d, i = env.step(env.action_space.sample())
 
-print(env.get_state_desc())
+# print(env.get_state_desc())
