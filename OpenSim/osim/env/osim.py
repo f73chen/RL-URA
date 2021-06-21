@@ -342,7 +342,7 @@ class OsimEnv(gym.Env):
         return self.get_observation()
 
     def step(self, action, project = True):
-        self.prev_state_desc = self.get_state_desc()        
+        self.prev_state_desc = self.get_state_desc()
         self.osim_model.actuate(action)
         self.osim_model.integrate()
 
