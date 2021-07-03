@@ -1,16 +1,13 @@
-from osim.env.osim_rsi import L2RunEnvRSI
+import os
 import opensim
+import numpy as np
+from osim.env.osim_rsi import L2RunEnvRSI
 
-params = {"Muscles": {"hamstrings_r": 0.5,
-                      "bifemsh_r": 0.25},
-          "Joints": {"ground_pelvis": [0.3, 0.4, 0.5],
-                     "knee_r": [0.5]}}
+dir_path = os.path.dirname(os.path.realpath(__file__))
+traj_path = dir_path + "\\" + "tracking_solution_fullStride.sto"
 
-env = L2RunEnvRSI(visualize=True)
-obs = env.reset(params)
-# env.ref_state_init(params)
+env = L2RunEnvRSI(visualize=True, traj_path=traj_path)
+obs = env.reset()
 
-for i in range(50):
-    o, r, d, i = env.step(env.action_space.sample())
-
-# print(env.get_state_desc())
+for i in range(100):
+    o, r, d, i = env.step(np.zeros(18))

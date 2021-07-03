@@ -1,45 +1,119 @@
 from .osim import *
+from .traj_reader import *
 import collections
 import numpy as np
 import pandas as pd
 import os.path
 
 class OsimModelRSI(OsimModel):
-    def reset(self, params):
-        # L2RunRSI calls this reset function instead of the original
-        # Able to receive params and load normally (if nothing else is changed)
-        print(params)
+    def __init__(self, init_coords, init_speeds, model_path, visualize, integrator_accuracy = 5e-5):
+        self.integrator_accuracy = integrator_accuracy
+        self.model = opensim.Model(model_path)
 
-        # Below is the same as the original
+        # Load reference coordinates
+        if init_coords:
+            for i in range(9):
+                self.model.getCoordinateSet().get(i).set_default_value(init_coords[i])
+
+        # Load reference speeds
+        if init_speeds:
+            for i in range(9):
+                self.model.getCoordinateSet().get(i).set_default_speed_value(init_speeds[i])
+
+        self.model.initSystem()
+        self.brain = opensim.PrescribedController()
+
+        # Enable the visualizer
+        self.model.setUseVisualizer(visualize)
+
+        self.muscleSet = self.model.getMuscles()
+        self.forceSet = self.model.getForceSet()
+        self.bodySet = self.model.getBodySet()
+        self.jointSet = self.model.getJointSet()
+        self.markerSet = self.model.getMarkerSet()
+        self.contactGeometrySet = self.model.getContactGeometrySet()
+
+        if self.verbose:
+            self.list_elements()
+
+        # Add actuators as constant functions. Then, during simulations
+        # we will change levels of constants.
+        # One actuartor per each muscle
+        for j in range(self.muscleSet.getSize()):
+            func = opensim.Constant(1.0)
+            self.brain.addActuator(self.muscleSet.get(j))
+            self.brain.prescribeControlForActuator(j, func)
+
+            self.maxforces.append(self.muscleSet.get(j).getMaxIsometricForce())
+            self.curforces.append(1.0)
+
+        self.noutput = self.muscleSet.getSize()
+            
+        self.model.addController(self.brain)
+        self.model.initSystem()
+
+    def reset(self, init_activations = None):
         self.state = self.model.initializeState()
         self.model.equilibrateMuscles(self.state)
         self.state.setTime(0)
         self.istep = 0
         self.reset_manager()
 
+        # Set initial muscle activations
+        if init_activations:
+            self.set_activations(init_activations)
+
 class OsimEnvRSI(OsimEnv):
-    def load_model(self, model_path = None):
+    def __init__(self, traj_path, visualize = True, integrator_accuracy = 5e-5):
+        # Load trajectory as an environment variable
+        trajreader = trajReader(traj_path)
+        self.traj = trajreader.get_traj()
+
+        # Rename trajectory columns
+        traj_columns = self.traj.columns.values
+        new_columns = ["time"] + [col.split('/')[-2] + '/' + col.split('/')[-1] for col in traj_columns[1:]]
+        self.traj.columns = new_columns
+
+        self.visualize = visualize
+        self.integrator_accuracy = integrator_accuracy
+        self.load_model()
+
+    def load_model(self, init_coords = None, init_speeds = None, model_path = None):
         if model_path:
             self.model_path = model_path
             
         # Changed this line to use OsimModelRSI instead
-        self.osim_model = OsimModelRSI(self.model_path, self.visualize, integrator_accuracy = self.integrator_accuracy)
+        self.osim_model = OsimModelRSI(init_coords = init_coords, init_speeds = init_speeds, model_path = self.model_path, visualize = self.visualize, integrator_accuracy = self.integrator_accuracy)
 
         # Create specs, action and observation spaces mocks for compatibility with OpenAI gym
         self.spec = Spec()
         self.spec.timestep_limit = self.time_limit
 
         self.action_space = ( [0.0] * self.osim_model.get_action_space_size(), [1.0] * self.osim_model.get_action_space_size() )
-#        self.observation_space = ( [-math.pi*100] * self.get_observation_space_size(), [math.pi*100] * self.get_observation_space_s
         self.observation_space = ( [0] * self.get_observation_space_size(), [0] * self.get_observation_space_size() )
         
         self.action_space = convert_to_gym(self.action_space)
         self.observation_space = convert_to_gym(self.observation_space)
        
-    def reset(self, params, project = True):
-        # Changed this line to pass in params
-        self.osim_model.reset(params)
+    def reset(self, project = True):
+        # Choose random state to init model with
+        rand_idx = np.random.randint(0, len(self.traj))
+        ref_state = self.traj.iloc[rand_idx, :]
+
+        # At reset, load joint coords
+        # Sorts list of coords and speeds according to osim_model joint order
+        init_coords = ref_state.iloc[1:10]
+        init_coords = [init_coords[self.osim_model.model.getCoordinateSet().get(i).getName() + "/value"] for i in range(9)]
         
+        init_speeds = ref_state.iloc[10:19]
+        init_speeds = [init_speeds[self.osim_model.model.getCoordinateSet().get(i).getName() + "/speed"] for i in range(9)]
+        
+        self.load_model(init_coords, init_speeds)
+
+        # At reset, load reference muscle activations
+        init_activations = list(ref_state.iloc[19:37])
+        self.osim_model.reset(init_activations)
+
         if not project:
             return self.get_state_desc()
         return self.get_observation()
@@ -85,31 +159,3 @@ class L2RunEnvRSI(OsimEnvRSI):
         if not prev_state_desc:
             return 0
         return state_desc["joint_pos"]["ground_pelvis"][1] - prev_state_desc["joint_pos"]["ground_pelvis"][1]
-
-
-    # def ref_state_init(self, params):
-    #     m = self.osim_model
-    #     s = m.get_state()
-    #     muscle_preset = params['Muscles']
-    #     joint_preset = params['Joints']
-    #     print(f"Muscle preset: {muscle_preset}")
-    #     print(f"Joint preset:  {joint_preset}")
-
-    #     ''' Didn't work: all joints at 0 '''
-    #     # for name, position in joint_preset.items():
-    #     #     for i in range(len(position)):
-    #     #         j = m.get_joint(name).upd_coordinates(i)
-    #     #         j.setValue(s, position[i])
-
-    #     ''' Didn't work: m.get_activations() returns 0.05 for all '''
-    #     # for name, activation in muscle_preset.items():
-    #     #     m.get_muscle(name).setActivation(s, activation)
-    #     #     print(m.get_activations())
-
-    #     # m.getCoordinateSet().get(0).setValue(0.5)
-
-    #     # coordinate_set = m.model.updCoordinateSet()
-
-    #     # for i in range(10):
-    #     #     coordinate_set.get(i).setValue(s, 0.0)
-    #     # print(m.list_elements())
