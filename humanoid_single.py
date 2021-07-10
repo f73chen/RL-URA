@@ -39,7 +39,7 @@ def learning_rate(frac):
 
 policy_kwargs = dict(activation_fn=th.nn.ReLU,                                          # ReLU instead of Tanh
                      net_arch=[dict(pi=[256,256,192,128], vf=[256,256,192,128])])       # v=10
-model = PPO('MlpPolicy', env, verbose=0, policy_kwargs=policy_kwargs, learning_rate=learning_rate)
+model = PPO('MlpPolicy', env, verbose=0, policy_kwargs=policy_kwargs, learning_rate=learning_rate, tensorboard_log=log_path)
 model.learn(total_timesteps=8000000)
 
 # Test saving and loading
