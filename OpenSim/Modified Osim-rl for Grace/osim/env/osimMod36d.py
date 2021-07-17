@@ -218,7 +218,7 @@ class OsimModelRSI(OsimModel):
 
     def reset(self, init_activations = None):
         self.state = self.model.initializeState()
-        self.model.equilibrateMuscles(self.state)
+        # self.model.equilibrateMuscles(self.state)
         self.state.setTime(0)
         self.istep = 0
         self.reset_manager()

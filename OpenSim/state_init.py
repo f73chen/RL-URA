@@ -11,6 +11,6 @@ from osim.env.osim import L2RunEnv
 env = L2RunEnv(visualize=True)
 obs = env.reset()
 
-# for i in range(1):
-#     o, r, d, i = env.step(np.zeros(18))
+for i in range(100):
+    o, r, d, i = env.step(np.zeros(18))
     # print(env.get_state_desc())
