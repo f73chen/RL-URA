@@ -139,7 +139,7 @@ def get_exc_reward(state_desc, dt):
 
 def get_jerk_reward(state_desc, prev_state_desc, dt):
     '''
-    panelty of jerk at center of mass 
+    penalty of jerk at center of mass 
     '''
     jerkx = ((state_desc['misc']['mass_center_acc'][0]-prev_state_desc['misc']['mass_center_acc'][0])/dt)**2
     jerky = ((state_desc['misc']['mass_center_acc'][1]-prev_state_desc['misc']['mass_center_acc'][1])/dt)**2
@@ -154,6 +154,18 @@ def get_slide_reward(state_desc, dt):
     l_slide = abs(state_desc['body_vel']['toes_l'][0])*l_toe_contact + abs(state_desc['body_vel']['calcn_l'][0])*l_heel_contact
     r_slide = abs(state_desc['body_vel']['toes_r'][0])*r_toe_contact + abs(state_desc['body_vel']['calcn_r'][0])*r_heel_contact
     return -(l_slide+r_slide)*dt
+
+def get_mimic_reward(state_desc, init_coords, dt):
+    '''
+    Squared deviation of each joint position from reference
+    '''
+    joint_order = ['ground_pelvis', 'hip_r', 'knee_r', 'ankle_r', 'hip_l', 'knee_l', 'ankle_l']
+    state_coords = []
+    for joint in joint_order:
+        state_coords += state_desc['joint_pos'][joint]
+    coord_diff = np.sum((np.array(init_coords) - np.array(state_coords))**2)
+
+    return -(coord_diff)*dt
 
 ####################################################################################################### modified env
 
@@ -215,11 +227,15 @@ class OsimModelRSI(OsimModel):
         if init_activations:
             self.set_activations(init_activations)
 
+
 class OsimEnvRSI(OsimEnv):
     def __init__(self, traj_path, visualize = True, integrator_accuracy = 5e-5):
         # Load trajectory as an environment variable
         trajreader = trajReader(traj_path)
-        self.traj = trajreader.get_traj()
+        self.traj = trajreader.interpolate_traj(dt=0.01)
+        self.init_coords = np.zeros(9)
+        self.init_speeds = np.zeros(9)
+        self.init_activations = np.zeros(18)
 
         # Rename trajectory columns
         traj_columns = self.traj.columns.values
@@ -254,21 +270,22 @@ class OsimEnvRSI(OsimEnv):
 
         # At reset, load joint coords
         # Sorts list of coords and speeds according to osim_model joint order
-        init_coords = ref_state.iloc[1:10]
-        init_coords = [init_coords[self.osim_model.model.getCoordinateSet().get(i).getName() + "/value"] for i in range(9)]
+        self.init_coords = ref_state.iloc[1:10]
+        self.init_coords = [self.init_coords[self.osim_model.model.getCoordinateSet().get(i).getName() + "/value"] for i in range(9)]
         
-        init_speeds = ref_state.iloc[10:19]
-        init_speeds = [init_speeds[self.osim_model.model.getCoordinateSet().get(i).getName() + "/speed"] for i in range(9)]
+        self.init_speeds = ref_state.iloc[10:19]
+        self.init_speeds = [self.init_speeds[self.osim_model.model.getCoordinateSet().get(i).getName() + "/speed"] for i in range(9)]
         
-        self.load_model(init_coords, init_speeds)
+        self.load_model(self.init_coords, self.init_speeds)
 
         # At reset, load reference muscle activations
-        init_activations = list(ref_state.iloc[19:37])
-        self.osim_model.reset(init_activations)
+        self.init_activations = list(ref_state.iloc[19:37])
+        self.osim_model.reset(self.init_activations)
 
         if not project:
             return self.get_state_desc()
         return self.get_observation()
+
 
 class L2RunEnvRSI(OsimEnvRSI):
     model_path = os.path.join(os.path.dirname(__file__), '../models/gait9dof18musc.osim')    
@@ -311,10 +328,6 @@ class L2RunEnvRSI(OsimEnvRSI):
         if not prev_state_desc:
             return 0
         return state_desc["joint_pos"]["ground_pelvis"][1] - prev_state_desc["joint_pos"]["ground_pelvis"][1]
-
-
-
-
 
 
 class L2RunEnvMod(L2RunEnvRSI):
@@ -448,11 +461,11 @@ class L2RunEnvMod(L2RunEnvRSI):
         return 36 # either list or int
     
     def get_reward_size(self):
-        return 9 # number of individual terms in the reward function
+        return 10 # number of individual terms in the reward function
     
     def get_reward_names(self):
         return ['forward_reward', 'survival_reward', 'torso_reward', 'joint_reward', 'stability_reward', 
-                'act_reward', 'footstep_reward', 'jerk_reward', 'slide_reward']
+                'act_reward', 'footstep_reward', 'jerk_reward', 'slide_reward', 'mimic_reward']
     
     def reward(self, istep):
         state_desc = self.get_state_desc()
@@ -499,29 +512,19 @@ class L2RunEnvMod(L2RunEnvRSI):
         
         #########################################################
 
-        # @@@ Add function to compute tracking reward
+        mimic_reward = get_mimic_reward(state_desc, self.init_coords, dt)
 
         #########################################################
-        if state_desc["misc"]["mass_center_pos"][0] < 1.:       # @@@ Comment out the first weighting scheme
-            self.reward_list = np.array([1.*forward_reward_qua, 
-                                         1.*survival_reward, 
-                                         1.*torso_reward, 
-                                         1.*joint_reward, 
-                                         0.2*stability_reward,
-                                         0.5*exc_reward, 
-                                         1.*footstep_reward, 
-                                         1.*jerk_reward,
-                                         1.*slide_reward])
-        else:
-            self.reward_list = np.array([1.*forward_reward_exp, # @@@ Add new reward here
-                                         1.*survival_reward, 
-                                         1.*torso_reward, 
-                                         1.*joint_reward, 
-                                         1.*stability_reward, 
-                                         1.*exc_reward, 
-                                         1.*footstep_reward, 
-                                         1.*jerk_reward,
-                                         1.*slide_reward])
+        self.reward_list = np.array([1.*forward_reward_exp,
+                                        1.*survival_reward, 
+                                        1.*torso_reward, 
+                                        1.*joint_reward, 
+                                        1.*stability_reward, 
+                                        1.*exc_reward, 
+                                        1.*footstep_reward, 
+                                        1.*jerk_reward,
+                                        1.*slide_reward,
+                                        1.*mimic_reward])
         
         return self.reward_weight@self.reward_list
         
