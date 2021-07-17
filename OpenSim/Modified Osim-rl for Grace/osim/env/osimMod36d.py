@@ -92,7 +92,7 @@ def get_torso_reward(state_desc, dt):
 
 def get_joint_reward(state_desc, dt):
     '''
-    panelty for passive joint torque when going to extreme joint angle 
+    penalty for passive joint torque when going to extreme joint angle 
     '''
     total_passive_torque = abs(state_desc['forces']['HipLimit_r'][0]) + \
                            abs(state_desc['forces']['HipLimit_l'][0]) + \
@@ -104,7 +104,7 @@ def get_joint_reward(state_desc, dt):
 
 def get_stability_reward(state_desc, dt):
     '''
-    panelty for the eCom deviating away from frontal BoS
+    penalty for the eCom deviating away from frontal BoS
     '''
     BoS = get_BoS(state_desc)
     eCoM = get_eCoM(state_desc)
@@ -157,7 +157,7 @@ def get_slide_reward(state_desc, dt):
 
 def get_mimic_reward(state_desc, init_coords, dt):
     '''
-    Squared deviation of each joint position from reference
+    penalty for deviation of joint position from reference trajectory
     '''
     joint_order = ['ground_pelvis', 'hip_r', 'knee_r', 'ankle_r', 'hip_l', 'knee_l', 'ankle_l']
     state_coords = []
@@ -165,7 +165,7 @@ def get_mimic_reward(state_desc, init_coords, dt):
         state_coords += state_desc['joint_pos'][joint]
     coord_diff = np.sum((np.array(init_coords) - np.array(state_coords))**2)
 
-    return -(coord_diff)*dt
+    return -5*(coord_diff)*dt
 
 ####################################################################################################### modified env
 
@@ -263,23 +263,25 @@ class OsimEnvRSI(OsimEnv):
         self.action_space = convert_to_gym(self.action_space)
         self.observation_space = convert_to_gym(self.observation_space)
        
+    def traj_from_idx(self):
+        ref_state = self.traj.iloc[self.traj_idx, :]
+
+        init_coords = ref_state.iloc[1:10]
+        init_coords = [init_coords[self.osim_model.model.getCoordinateSet().get(i).getName() + "/value"] for i in range(9)]
+        
+        init_speeds = ref_state.iloc[10:19]
+        init_speeds = [init_speeds[self.osim_model.model.getCoordinateSet().get(i).getName() + "/speed"] for i in range(9)]
+
+        init_activations = list(ref_state.iloc[19:37])
+
+        return init_coords, init_speeds, init_activations
+
     def reset(self, project = True):
         # Choose random state to init model with
-        rand_idx = np.random.randint(0, len(self.traj))
-        ref_state = self.traj.iloc[rand_idx, :]
-
-        # At reset, load joint coords
-        # Sorts list of coords and speeds according to osim_model joint order
-        self.init_coords = ref_state.iloc[1:10]
-        self.init_coords = [self.init_coords[self.osim_model.model.getCoordinateSet().get(i).getName() + "/value"] for i in range(9)]
-        
-        self.init_speeds = ref_state.iloc[10:19]
-        self.init_speeds = [self.init_speeds[self.osim_model.model.getCoordinateSet().get(i).getName() + "/speed"] for i in range(9)]
+        self.traj_idx = np.random.randint(0, len(self.traj))
+        self.init_coords, self.init_speeds, self.init_activations = self.traj_from_idx()
         
         self.load_model(self.init_coords, self.init_speeds)
-
-        # At reset, load reference muscle activations
-        self.init_activations = list(ref_state.iloc[19:37])
         self.osim_model.reset(self.init_activations)
 
         if not project:
@@ -408,7 +410,7 @@ class L2RunEnvMod(L2RunEnvRSI):
         
         return [obs, 
                 self.reward(self.osim_model.istep), 
-                self.is_done() or (self.osim_model.istep >= self.spec.timestep_limit), 
+                self.is_done() or (self.osim_model.istep >= self.spec.timestep_limit) or (self.traj_idx >= len(self.traj)), 
                 {}]
                   
     def update_footstep(self):
@@ -512,7 +514,10 @@ class L2RunEnvMod(L2RunEnvRSI):
         
         #########################################################
 
-        mimic_reward = get_mimic_reward(state_desc, self.init_coords, dt)
+        # Works! Mimic_reward accumulation slows down when the counter is implemented
+        curr_ref_coords, _, _ = self.traj_from_idx()
+        mimic_reward = get_mimic_reward(state_desc, curr_ref_coords, dt)
+        self.traj_idx += 1
 
         #########################################################
         self.reward_list = np.array([1.*forward_reward_exp,

@@ -26,7 +26,7 @@ params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0],
           'lr_a1': 1.0e-4,
           'lr_a2': 2, 
           'target_speed_range': [0.8,1.2],
-          'total_timesteps': 2}
+          'total_timesteps': 800}
 
 v = "v6"
 d = "muscle"
