@@ -530,6 +530,9 @@ class L2RunEnvMod(L2RunEnvRSI):
                                         1.*jerk_reward,
                                         1.*slide_reward,
                                         1.*mimic_reward])
+
+        if np.random.randint(0, 10) == 0:
+            print(f"Current reward: {self.reward_weight@self.reward_list}")
         
         return self.reward_weight@self.reward_list
         

@@ -28,9 +28,9 @@ params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0],
           'lr_a1': 1.0e-4,
           'lr_a2': 2, 
           'target_speed_range': [0.8,1.2],
-          'total_timesteps': 10000}
+          'total_timesteps': 40000}
 
-v = "v6"
+v = "v9"
 d = "muscle"
 log_path = f"{d}/muscle_log_{v}/"
 
@@ -77,7 +77,7 @@ if __name__ ==  '__main__':
                                 stepsize=params['stepsize'], 
                                 reward_weight = params['reward_weight'], 
                                 action_limit = params['action_limit'], 
-                                visualize=True,
+                                visualize=False,
                                 traj_path=traj_path,
                                 integrator_accuracy=params['integrator_accuracy'], 
                                 target_speed_range = params['target_speed_range'], 
