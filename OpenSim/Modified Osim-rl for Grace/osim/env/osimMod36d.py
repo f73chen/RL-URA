@@ -410,7 +410,7 @@ class L2RunEnvMod(L2RunEnvRSI):
         
         return [obs, 
                 self.reward(self.osim_model.istep), 
-                self.is_done() or (self.osim_model.istep >= self.spec.timestep_limit) or (self.traj_idx >= len(self.traj)), 
+                self.is_done() or (self.osim_model.istep >= self.spec.timestep_limit), 
                 {}]
                   
     def update_footstep(self):
@@ -517,7 +517,7 @@ class L2RunEnvMod(L2RunEnvRSI):
         # Works! Mimic_reward accumulation slows down when the counter is implemented
         curr_ref_coords, _, _ = self.traj_from_idx()
         mimic_reward = get_mimic_reward(state_desc, curr_ref_coords, dt)
-        self.traj_idx += 1
+        self.traj_idx = (self.traj_idx + 1) % len(self.traj)
 
         #########################################################
         self.reward_list = np.array([1.*forward_reward_exp,
