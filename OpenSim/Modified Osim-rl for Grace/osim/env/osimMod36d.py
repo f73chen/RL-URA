@@ -160,12 +160,13 @@ def get_mimic_reward(state_desc, init_coords, dt):
     penalty for deviation of joint position from reference trajectory
     '''
     joint_order = ['ground_pelvis', 'hip_r', 'knee_r', 'ankle_r', 'hip_l', 'knee_l', 'ankle_l']
+    diff_weights = [1, 1, 1,         1,       2,        2,         1,       2,        2]
     state_coords = []
     for joint in joint_order:
         state_coords += state_desc['joint_pos'][joint]
-    coord_diff = np.sum((np.array(init_coords) - np.array(state_coords))**2)
+    coord_diff = (np.array(init_coords) - np.array(state_coords))**2
 
-    return -5*(coord_diff)*dt
+    return -10*(np.dot(diff_weights, coord_diff))*dt
 
 ####################################################################################################### modified env
 
