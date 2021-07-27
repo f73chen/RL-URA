@@ -161,7 +161,7 @@ def get_mimic_reward(state_desc, init_coords, dt):
     '''
     # Pelvis: pelvis_tilt, pelvis_tx, pelvis_ty
     joint_order = ['ground_pelvis', 'hip_r', 'knee_r', 'ankle_r', 'hip_l', 'knee_l', 'ankle_l']
-    diff_weights = [1, 1, 0.5,         1,       1,        1,         1,       1,        1]
+    diff_weights = [0.75,  1,  1,    1.5,     1,        1,         1.5,     1,        1]
     state_coords = []
     for joint in joint_order:
         state_coords += state_desc['joint_pos'][joint]

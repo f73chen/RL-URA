@@ -16,7 +16,7 @@ from stable_baselines3.common.utils import set_random_seed
 
 from osim.env.osimMod36d import L2RunEnvMod
 
-params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 5.0],
+params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 2.0, 5.0],
           #['forward', 'survival', 'torso', 'joint', 'stability', 'act', 'footstep', 'jerk', 'slide', 'mimic']
           'action_limit': [1]*18,
           'time_limit': 1000,
@@ -29,7 +29,7 @@ params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 5.0],
           'target_speed_range': [0.8,1.2],
           'total_timesteps': 2000000}
 
-v = "v5_3"
+v = "v5_4"
 d = "muscle"
 log_dir = f"{d}/muscle_log_{v}/"
 
