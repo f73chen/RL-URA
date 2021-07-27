@@ -1,2 +1,4 @@
 # humanoid/
 .ipynb_checkpoints/
+*.pyc
+*out.log
