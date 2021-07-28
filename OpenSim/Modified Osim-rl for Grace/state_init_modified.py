@@ -16,10 +16,10 @@ from stable_baselines3.common.utils import set_random_seed
 
 from osim.env.osimMod36d import L2RunEnvMod
 
-params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 2.0, 5.0],
+params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 10],
           #['forward', 'survival', 'torso', 'joint', 'stability', 'act', 'footstep', 'jerk', 'slide', 'mimic']
           'action_limit': [1]*18,
-          'time_limit': 1000,
+          'time_limit': 50,
           'stepsize': 0.01,
           'integrator_accuracy': 5e-5,
           'seed': 0,
@@ -27,14 +27,14 @@ params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 2.0, 5.0],
           'lr_a1': 1.0e-4,
           'lr_a2': 2, 
           'target_speed_range': [0.8,1.2],
-          'total_timesteps': 2000000}
+          'total_timesteps': 4000000}
 
-v = "v5_4"
+v = "v6_2"
 d = "muscle"
 log_dir = f"{d}/muscle_log_{v}/"
 
 def learning_rate(frac):
-    return 1.0e-4*(np.exp(6*(frac-1)))
+    return 1.0e-5*(np.exp(6*(frac-1)))
 
 def own_policy(obs):
     action = np.zeros(18)
@@ -97,9 +97,9 @@ if __name__ ==  '__main__':
 
     # '''
     policy_kwargs = dict(activation_fn=th.nn.Tanh,
-                        net_arch=[dict(vf=[512,512,512,256], pi=[512,512,512,128])])     # v=5
+                        net_arch=[dict(vf=[512,512,512,256], pi=[512,512,512,256])])     # v=5
     # model = PPO('MlpPolicy', env, verbose=0, policy_kwargs=policy_kwargs, learning_rate=learning_rate, n_steps=128) # , tensorboard_log=log_dir
-    model = PPO.load(f"{d}/muscle_lv4", env = env)
+    model = PPO.load(f"{d}/muscle_lv5", env = env)
     model.learn(total_timesteps=params['total_timesteps'])
 
     # Test saving and loading
