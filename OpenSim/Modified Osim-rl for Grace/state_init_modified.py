@@ -16,10 +16,10 @@ from stable_baselines3.common.utils import set_random_seed
 
 from osim.env.osimMod36d import L2RunEnvMod
 
-params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 10],
+params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 5],
           #['forward', 'survival', 'torso', 'joint', 'stability', 'act', 'footstep', 'jerk', 'slide', 'mimic']
-          'action_limit': [1]*18,
-          'time_limit': 1000,
+          'action_limit': [1]*16,
+          'time_limit': 50,
           'stepsize': 0.01,
           'integrator_accuracy': 5e-5,
           'seed': 0,
@@ -27,9 +27,9 @@ params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 10],
           'lr_a1': 1.0e-4,
           'lr_a2': 2, 
           'target_speed_range': [0.8,1.2],
-          'total_timesteps': 4000000}
+          'total_timesteps': 400}
 
-v = "v6_2"
+v = "vtest"
 d = "muscle"
 log_dir = f"{d}/muscle_log_{v}/"
 
@@ -80,7 +80,8 @@ if __name__ ==  '__main__':
                                 traj_path=traj_path,
                                 integrator_accuracy=params['integrator_accuracy'], 
                                 target_speed_range = params['target_speed_range'], 
-                                own_policy=own_policy) 
+                                own_policy=own_policy,
+                                muscle_synergy=True) 
                         for i in range(params['num_cpu'])])
 
     # print(env.observation_space)    # Box(0.0, 0.0, (36,), float32)
@@ -95,21 +96,21 @@ if __name__ ==  '__main__':
     obs = env.reset()
 
 
-    '''
+    # '''
     policy_kwargs = dict(activation_fn=th.nn.Tanh,
                         net_arch=[dict(vf=[512,512,512,256], pi=[512,512,512,256])])     # v=5
-    # model = PPO('MlpPolicy', env, verbose=0, policy_kwargs=policy_kwargs, learning_rate=learning_rate, n_steps=128) # , tensorboard_log=log_dir
-    model = PPO.load(f"{d}/muscle_lv5", env = env)
-    model.learn(total_timesteps=params['total_timesteps'])
+    model = PPO('MlpPolicy', env, verbose=0, policy_kwargs=policy_kwargs, learning_rate=learning_rate, n_steps=128) # , tensorboard_log=log_dir
+    # model = PPO.load(f"{d}/muscle_lv5", env = env)
+    # model.learn(total_timesteps=params['total_timesteps'])
 
     # Test saving and loading
-    model.save(f"{d}/muscle_l{v}")
-    del model
-    '''
+    # model.save(f"{d}/muscle_l{v}")
+    # del model
     # '''
-    model = PPO.load(f"{d}/muscle_l{v}", env = env)
+    # '''
+    # model = PPO.load(f"{d}/muscle_l{v}", env = env)
     obs = env.reset()
-    for i in range(1000):
+    for i in range(1):
         action, _state = model.predict(obs, deterministic=False)
         # print(action)
         obs, reward, done, info = env.step(action)

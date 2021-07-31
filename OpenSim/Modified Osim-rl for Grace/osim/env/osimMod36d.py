@@ -341,7 +341,7 @@ class L2RunEnvMod(L2RunEnvRSI):
     G = 9.80665 
     
     def __init__(self, reward_weight=None, action_limit=None, target_speed_range=[0.7, 1.3], own_policy=None, 
-                 muscle_synergy=None, *args, **kwargs):
+                 muscle_synergy=False, *args, **kwargs):
 
         self.target_speed_range = target_speed_range
         self.own_policy = own_policy
@@ -396,8 +396,33 @@ class L2RunEnvMod(L2RunEnvRSI):
         self.footstep['location'] = 0
         self.target_speed = np.random.uniform(self.target_speed_range[0], self.target_speed_range[1])
         return super().reset()
+
+    def translate_synergies(self, action):
+        # Input size 16, output size 18
+        # Inputs: w1_r, w2_r, w3_r, w4_r, BFSH_r, GMAX_r, ILOP_r, GAS_r, w1_r, w2_r, w3_r, w4_r, BFSH_r, GMAX_r, ILOP_r, GAS_r
+        # Outputs: HAM, BFSH, GMAX, ILOP, RFEM, VAST, GAS, SOL, TA [R then L]
+        #     HAM,  RFEM, VAST, SOL,  TA
+        w = [[0.0,  0.02, 0.06, 0.15, 0.3],
+             [0.33, 0.0,  0.0,  0.2,  0.0],
+             [0.05, 0.0,  0.0,  0.08, 0.6],
+             [0.0,  1.0,  0.57, 0.04, 0.22]]
+
+        act_r = [0, 0, 0, 0, 0]
+        act_l = [0, 0, 0, 0, 0]
+        for i in range(4):
+            for j in range(5):
+                act_r[j] += action[i]*w[i][j]
+                act_l[j] += action[i+8]*w[i][j]
+        full_action = [act_r[0], action[4], action[5], action[6], act_r[1], act_r[2], action[7], act_r[3], act_r[4],
+                       act_l[0], action[12], action[13], action[14], act_l[1], act_l[2], action[15], act_l[3], act_l[4]]
+
+        return full_action
     
     def step(self, action, project = True):
+        if self.muscle_synergy:
+            print(translate_synergies(np.zeros(16)))
+            action =  translate_synergies(action)
+
         # perform action clipping
         if self.own_policy is not None:
             own_action = self.own_policy(self.get_observation())
@@ -456,8 +481,8 @@ class L2RunEnvMod(L2RunEnvRSI):
         return get_observation_vec(state_desc, self.target_speed)
     
     def get_action_space_size(self):
-        if self.muscle_synergy is not None:
-            return 4
+        if self.muscle_synergy is not False:
+            return 16
         else:
             return self.osim_model.get_action_space_size()
         
