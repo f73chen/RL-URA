@@ -401,20 +401,20 @@ class L2RunEnvMod(L2RunEnvRSI):
         # Input size 16, output size 18
         # Inputs: w1_r, w2_r, w3_r, w4_r, BFSH_r, GMAX_r, ILOP_r, GAS_r, w1_r, w2_r, w3_r, w4_r, BFSH_r, GMAX_r, ILOP_r, GAS_r
         # Outputs: HAM, BFSH, GMAX, ILOP, RFEM, VAST, GAS, SOL, TA [R then L]
-        #     HAM,  RFEM, VAST, SOL,  TA
-        w = [[0.0,  0.02, 0.06, 0.15, 0.3],
-             [0.33, 0.0,  0.0,  0.2,  0.0],
-             [0.05, 0.0,  0.0,  0.08, 0.6],
-             [0.0,  1.0,  0.57, 0.04, 0.22]]
+        #     HAM,  RFEM, VAST, GAS, SOL,  TA
+        w = [[0.0,  0.02, 0.06, 0.0, 0.15, 0.3],
+             [0.33, 0.0,  0.0, 1.0,  0.2,  0.0],
+             [0.05, 0.0,  0.0, 0.52,  0.08, 0.6],
+             [0.0,  1.0,  0.57, 0.0, 0.04, 0.22]]
 
-        act_r = [0, 0, 0, 0, 0]
-        act_l = [0, 0, 0, 0, 0]
+        act_r = [0, 0, 0, 0, 0, 0]
+        act_l = [0, 0, 0, 0, 0, 0]
         for i in range(4):
-            for j in range(5):
+            for j in range(6):
                 act_r[j] += action[i]*w[i][j]
                 act_l[j] += action[i+8]*w[i][j]
-        full_action = [act_r[0], action[4], action[5], action[6], act_r[1], act_r[2], action[7], act_r[3], act_r[4],
-                       act_l[0], action[12], action[13], action[14], act_l[1], act_l[2], action[15], act_l[3], act_l[4]]
+        full_action = [act_r[0], action[4],  action[5],  action[6],  act_r[1], act_r[2], act_r[3], act_r[4], act_r[5],    # double check indices
+                       act_l[0], action[12], action[13], action[14], act_l[1], act_l[2], act_l[3], act_l[4], act_l[5]]
 
         return full_action
     
