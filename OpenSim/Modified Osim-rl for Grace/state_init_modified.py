@@ -18,7 +18,7 @@ from osim.env.osimMod36d import L2RunEnvMod
 
 params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 5],
           #['forward', 'survival', 'torso', 'joint', 'stability', 'act', 'footstep', 'jerk', 'slide', 'mimic']
-          'action_limit': [1]*16,
+          'action_limit': [1]*18,
           'time_limit': 50,
           'stepsize': 0.01,
           'integrator_accuracy': 5e-5,
@@ -107,16 +107,16 @@ if __name__ ==  '__main__':
     # model.save(f"{d}/muscle_l{v}")
     # del model
     # '''
-    '''
+    # '''
     # model = PPO.load(f"{d}/muscle_l{v}", env = env)
     obs = env.reset()
-    for i in range(1):
+    for i in range(100):
         action, _state = model.predict(obs, deterministic=False)
-        # print(action)
         obs, reward, done, info = env.step(action)
         if done:
             obs = env.reset()
-    '''
+    # '''
 
-    for i in range(1):
-        o, r, d, i = env.step([0, 0, 0, 0, 0, 0.1, 0.2, 0.3, 0, 0, 0, 0, 0, 0.4, 0.5, 0.6])
+    # for i in range(1):
+    #     o, r, d, i = env.step([[1, 1, 0, 0, 0, 0.1, 0.2, 0.3, 1, 1, 0, 0, 0, 0.4, 0.5, 0.6]])
+    

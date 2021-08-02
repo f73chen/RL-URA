@@ -430,13 +430,12 @@ class L2RunEnvMod(L2RunEnvRSI):
             weighted[i+1]  = action[i+5]    # Right side
             weighted[i+10] = action[i+13]   # Left side
 
-        print(weighted)
-        return weighted
+        return np.array(weighted)
 
     
     def step(self, action, project = True):
         if self.muscle_synergy:
-            action = self.translate_synergies(np.zeros(18))
+            action = self.translate_synergies(action)
 
         # perform action clipping
         if self.own_policy is not None:
@@ -497,7 +496,7 @@ class L2RunEnvMod(L2RunEnvRSI):
     
     def get_action_space_size(self):
         if self.muscle_synergy is not False:
-            return 16
+            return 18
         else:
             return self.osim_model.get_action_space_size()
         
