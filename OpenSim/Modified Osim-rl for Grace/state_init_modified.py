@@ -10,9 +10,13 @@ import matplotlib.pyplot as plt
 from stable_baselines3 import PPO
 from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.callbacks import EvalCallback
-from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
-
+from stable_baselines3.common.vec_env import SubprocVecEnv
 from stable_baselines3.common.utils import set_random_seed
+
+from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.results_plotter import load_results, ts2xy
+from stable_baselines3.common.noise import NormalActionNoise
+from stable_baselines3.common.callbacks import BaseCallback, EveryNTimesteps
 
 from osim.env.osimMod36d import L2RunEnvMod
 
@@ -32,6 +36,8 @@ params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 10],
 v = "v6_2"
 d = "muscle"
 log_dir = f"{d}/muscle_log_{v}/"
+tb_dir = log_dir + "tb/"
+os.makedirs(log_dir, exist_ok=True)
 
 def learning_rate(frac):
     return 1.0e-5*(np.exp(6*(frac-1)))
@@ -49,24 +55,70 @@ def make_env(env_in, rank, time_limit, seed=0, stepsize=0.01, **kwargs):
     :param seed: (int) the inital seed for RNG
     :param rank: (int) index of the subprocess
     """
-    # if os.path.exists(log_dir + '/env_0/monitor.csv'):
-    #     raise Exception("existing monitor files found!!!")
+    if os.path.exists(log_dir + '/env_0/monitor.csv'):
+        raise Exception("existing monitor files found!!!")
     
     def _init():
         env_in.time_limit = time_limit
         env = env_in(**kwargs) 
         env.osim_model.stepsize = stepsize
-        # log_sub_dir = log_dir + '/env_{}'.format(str(rank))
-        # os.makedirs(log_sub_dir, exist_ok=True)
-        # env = Monitor(env, log_sub_dir, allow_early_resets=True)
+        log_sub_dir = log_dir + '/env_{}'.format(str(rank))
+        os.makedirs(log_sub_dir, exist_ok=True)
+        env = Monitor(env, log_sub_dir, allow_early_resets=True)
         env.seed(seed + rank)
         return env
     set_random_seed(seed)
     return _init
 
-
 dir_path = os.path.dirname(os.path.realpath(__file__))
 traj_path = dir_path + "\\" + "tracking_solution_fullStride.sto"
+
+
+
+def extract_xy(log_dir, num_rollout):
+    y = []
+    for folder in os.listdir(log_dir):
+        if folder.startswith('env_'):
+            _, y_tmp = ts2xy(load_results(log_dir+folder), 'timesteps')
+            if len(y_tmp) > 0:
+                y.extend(list(y_tmp[-num_rollout:]))
+    y = sum(y)/len(y) if len(y) > 0 else -np.inf 
+    return y
+
+class LogCallback(BaseCallback):
+    """
+    A custom callback that derives from ``BaseCallback``.
+
+    :param verbose: (int) Verbosity level 0: not output 1: info 2: debug
+    """
+    def __init__(self, log_dir, verbose=0, num_rollout=5):
+        self.log_dir = log_dir
+        self.best_mean_reward = -np.inf
+        self.num_rollout = num_rollout
+        super(LogCallback, self).__init__(verbose)
+
+    def _on_step(self) -> bool:
+        mean_reward = extract_xy(self.log_dir, self.num_rollout)
+        if mean_reward != -np.inf:
+            # clear_output(wait=True)
+            print(self.num_timesteps, 'timesteps')
+            print("Best mean reward: {:.2f} - Last mean reward per episode: {:.2f}". \
+                  format(self.best_mean_reward, mean_reward))
+
+            # New best model, you could save the agent here
+            if mean_reward > self.best_mean_reward:
+                self.best_mean_reward = mean_reward
+                # Example for saving best model
+                print("Saving new best model")
+                self.model.save(self.log_dir + 'best_model')
+                self.model.save(self.log_dir + 'latest_model')
+            else:
+                print("Saving latest model")
+                self.model.save(self.log_dir + 'latest_model')
+        return True
+    
+log_callback = LogCallback(log_dir, num_rollout=5)
+event_callback = EveryNTimesteps(n_steps=2000, callback=log_callback)
 
 
 
@@ -95,18 +147,18 @@ if __name__ ==  '__main__':
     obs = env.reset()
 
 
-    '''
+    # '''
     policy_kwargs = dict(activation_fn=th.nn.Tanh,
                         net_arch=[dict(vf=[512,512,512,256], pi=[512,512,512,256])])     # v=5
-    # model = PPO('MlpPolicy', env, verbose=0, policy_kwargs=policy_kwargs, learning_rate=learning_rate, n_steps=128) # , tensorboard_log=log_dir
-    model = PPO.load(f"{d}/muscle_lv5", env = env)
-    model.learn(total_timesteps=params['total_timesteps'])
+    model = PPO('MlpPolicy', env, verbose=0, policy_kwargs=policy_kwargs, learning_rate=learning_rate, n_steps=128, tensorboard_log=log_dir) # 
+    # model = PPO.load(f"{d}/muscle_lv5", env = env)
+    model.learn(total_timesteps=params['total_timesteps'], callback=event_callback)
 
     # Test saving and loading
     model.save(f"{d}/muscle_l{v}")
     del model
-    '''
     # '''
+    '''
     model = PPO.load(f"{d}/muscle_l{v}", env = env)
     obs = env.reset()
     for i in range(1000):
@@ -115,7 +167,52 @@ if __name__ ==  '__main__':
         obs, reward, done, info = env.step(action)
         if done:
             obs = env.reset()
-    # '''
+    '''
 
     # for i in range(100):
     #     o, r, d, i = env.step(np.zeros(18))
+
+
+
+def moving_average(values, window):
+    """
+    Smooth values by doing a moving average
+    :param values: (numpy array)
+    :param window: (int)
+    :return: (numpy array)
+    """
+    weights = np.repeat(1.0, window) / window
+    return np.convolve(values, weights, 'valid')
+
+
+def plot_results(log_folder, title='Learning Curve', instances=1, same_plot=False):
+    """
+    plot the results
+
+    :param log_folder: (str) the save location of the results to plot
+    :param title: (str) the title of the task to plot
+    :instances: (int) the number of instances to average
+    """
+    x, y = ts2xy(load_results(log_folder+'/env_0'), 'timesteps')
+
+    if instances > 1:
+        for i in range(1,instances):
+            _, y_tmp = ts2xy(load_results(log_folder+'/env_'+str(i)), 'timesteps')
+            if len(y) > len(y_tmp):
+                y = y[:len(y_tmp)] + y_tmp
+            else:
+                y = y + y_tmp[:len(y)]
+        y = y/instances
+    
+    y = moving_average(y, window=5) # change window value to change level of smoothness
+    # Truncate x
+    x = x[len(x) - len(y):]
+    fig = plt.figure(title)
+    plt.plot(x, y)
+    plt.xlabel('Number of Timesteps')
+    plt.ylabel('Rewards')
+    plt.title(title + " Smoothed")
+    if same_plot is False:
+        plt.show()
+
+plot_results(log_dir, instances=6)
