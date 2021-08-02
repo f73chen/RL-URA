@@ -107,7 +107,7 @@ if __name__ ==  '__main__':
     # model.save(f"{d}/muscle_l{v}")
     # del model
     # '''
-    # '''
+    '''
     # model = PPO.load(f"{d}/muscle_l{v}", env = env)
     obs = env.reset()
     for i in range(1):
@@ -116,7 +116,7 @@ if __name__ ==  '__main__':
         obs, reward, done, info = env.step(action)
         if done:
             obs = env.reset()
-    # '''
+    '''
 
-    # for i in range(100):
-    #     o, r, d, i = env.step(np.zeros(18))
+    for i in range(1):
+        o, r, d, i = env.step([0, 0, 0, 0, 0, 0.1, 0.2, 0.3, 0, 0, 0, 0, 0, 0.4, 0.5, 0.6])

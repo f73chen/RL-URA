@@ -397,31 +397,46 @@ class L2RunEnvMod(L2RunEnvRSI):
         self.target_speed = np.random.uniform(self.target_speed_range[0], self.target_speed_range[1])
         return super().reset()
 
-    def translate_synergies(self, action):
-        # Input size 16, output size 18
-        # Inputs: w1_r, w2_r, w3_r, w4_r, BFSH_r, GMAX_r, ILOP_r, GAS_r, w1_r, w2_r, w3_r, w4_r, BFSH_r, GMAX_r, ILOP_r, GAS_r
+    def translate_synergies(self, action, mode="ss"):
+        # Inputs: wr0, wr1, wr2, wr3, wr4, BFSHr, GMAXr, ILOPr, wl0, wl1, wl2, wl3, wl4, BFSHl, GMAXl, ILOPl, 
         # Outputs: HAM, BFSH, GMAX, ILOP, RFEM, VAST, GAS, SOL, TA [R then L]
-        #     HAM,  RFEM, VAST, GAS, SOL,  TA
-        w = [[0.0,  0.02, 0.06, 0.0, 0.15, 0.3],
-             [0.33, 0.0,  0.0, 1.0,  0.2,  0.0],
-             [0.05, 0.0,  0.0, 0.52,  0.08, 0.6],
-             [0.0,  1.0,  0.57, 0.0, 0.04, 0.22]]
 
-        act_r = [0, 0, 0, 0, 0, 0]
-        act_l = [0, 0, 0, 0, 0, 0]
-        for i in range(4):
-            for j in range(6):
-                act_r[j] += action[i]*w[i][j]
-                act_l[j] += action[i+8]*w[i][j]
-        full_action = [act_r[0], action[4],  action[5],  action[6],  act_r[1], act_r[2], act_r[3], act_r[4], act_r[5],    # double check indices
-                       act_l[0], action[12], action[13], action[14], act_l[1], act_l[2], act_l[3], act_l[4], act_l[5]]
+        if mode == "sw":    # Slow walking weights
+            #     HAM,  BFSH, GMAX, ILOP, RFEM, VAST, GAS,  SOL,  TA
+            w = [[0.0,                    0.02, 0.06, 0.0,  0.15, 0.3],
+                 [0.33,                   0.0,  0.0,  1.0,  0.2,  0.0],
+                 [0.05,                   0.0,  0.0,  0.52, 0.08, 0.6],
+                 [0.0,                    1.0,  0.57, 0.0,  0.04, 0.22],
+                 [0.62,                   0.21, 0.39, 0.0,  0.0,  1.0]]
+        elif mode == "ss":  # Self-selected walking weights
+            #     HAM,  BFSH, GMAX, ILOP, RFEM, VAST, GAS,  SOL,  TA
+            w = [[0.0,                    0.75, 0.46, 0.0,  0.06, 0.39],
+                 [0.02,                   0.0,  0.0,  1.0,  0.28, 0.1],
+                 [0.07,                   0.08, 0.03, 0.4,  0.07, 0.0],
+                 [0.04,                   0.0,  0.03, 0.97, 0.01, 0.15],
+                 [0.85,                   0.0,  0.29, 0.13, 0.07, 0.53]]
+        else:
+            raise ValueError('Mode should be sw (slow walking) or ss (self-selected walking)')
 
-        return full_action
+        idx = [0, 4, 5, 6, 7, 8, 9, 13, 14, 15, 16, 17]
+        weighted = np.zeros(18)
+
+        for i in range(5):      # Number of synergies
+            for j in range(6):  # Number of muscles affected by synergy
+                weighted[idx[j]]   += action[i]   * w[i][j]     # Right side
+                weighted[idx[j+6]] += action[i+8] * w[i][j]     # Left side
+
+        for i in range(3):      # Number of muscles not affected by synergy
+            weighted[i+1]  = action[i+5]    # Right side
+            weighted[i+10] = action[i+13]   # Left side
+
+        print(weighted)
+        return weighted
+
     
     def step(self, action, project = True):
         if self.muscle_synergy:
-            print(translate_synergies(np.zeros(16)))
-            action =  translate_synergies(action)
+            action = self.translate_synergies(np.zeros(18))
 
         # perform action clipping
         if self.own_policy is not None:
