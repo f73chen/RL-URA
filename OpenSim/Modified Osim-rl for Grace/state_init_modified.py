@@ -31,16 +31,16 @@ params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 10],
           'lr_a1': 1.0e-4,
           'lr_a2': 2, 
           'target_speed_range': [0.8,1.2],
-          'total_timesteps': 400}
+          'total_timesteps': 1000000}
 
-v = "vitertest"
+v = "v11"
 d = "muscle"
 log_dir = f"{d}/muscle_log_{v}/"
 tb_dir = log_dir + "tb/"
 os.makedirs(log_dir, exist_ok=True)
 
 def learning_rate(frac):
-    return 1.0e-5*(np.exp(6*(frac-1)))
+    return 1.0e-4*(np.exp(6*(frac-1)))
 
 def own_policy(obs):
     action = np.zeros(18)
@@ -151,8 +151,11 @@ if __name__ ==  '__main__':
     # print(env.observation_space)    # Box(0.0, 0.0, (36,), float32)
     # print(env.init_space)
 
-    iter_params = [{'time_limit': 20, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 10]},
-                   {'time_limit': 50, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 10]}]
+    # Decrease mimic reward over time
+    iter_params = [{'time_limit': 20, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 8.0]},
+                   {'time_limit': 30, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 5.0]},
+                   {'time_limit': 40, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 3.0]},
+                   {'time_limit': 50, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 2.0]}]
     envs = [iter_env(**ip) for ip in iter_params]
 
     # '''
