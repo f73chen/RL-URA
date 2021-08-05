@@ -33,7 +33,7 @@ params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 10],
           'target_speed_range': [0.8,1.2],
           'total_timesteps': 4000000}
 
-v = "v6_2"
+v = "v5_9"
 d = "muscle"
 log_dir = f"{d}/muscle_log_{v}/"
 tb_dir = log_dir + "tb/"
@@ -55,8 +55,8 @@ def make_env(env_in, rank, time_limit, seed=0, stepsize=0.01, **kwargs):
     :param seed: (int) the inital seed for RNG
     :param rank: (int) index of the subprocess
     """
-    if os.path.exists(log_dir + '/env_0/monitor.csv'):
-        raise Exception("existing monitor files found!!!")
+    # if os.path.exists(log_dir + '/env_0/monitor.csv'):
+    #     raise Exception("existing monitor files found!!!")
     
     def _init():
         env_in.time_limit = time_limit
@@ -147,7 +147,7 @@ if __name__ ==  '__main__':
     obs = env.reset()
 
 
-    # '''
+    '''
     policy_kwargs = dict(activation_fn=th.nn.Tanh,
                         net_arch=[dict(vf=[512,512,512,256], pi=[512,512,512,256])])     # v=5
     model = PPO('MlpPolicy', env, verbose=0, policy_kwargs=policy_kwargs, learning_rate=learning_rate, n_steps=128, tensorboard_log=log_dir) # 
@@ -157,8 +157,8 @@ if __name__ ==  '__main__':
     # Test saving and loading
     model.save(f"{d}/muscle_l{v}")
     del model
-    # '''
     '''
+    # '''
     model = PPO.load(f"{d}/muscle_l{v}", env = env)
     obs = env.reset()
     for i in range(1000):
@@ -167,7 +167,7 @@ if __name__ ==  '__main__':
         obs, reward, done, info = env.step(action)
         if done:
             obs = env.reset()
-    '''
+    # '''
 
     # for i in range(100):
     #     o, r, d, i = env.step(np.zeros(18))
@@ -215,4 +215,4 @@ def plot_results(log_folder, title='Learning Curve', instances=1, same_plot=Fals
     if same_plot is False:
         plt.show()
 
-plot_results(log_dir, instances=6)
+# plot_results(log_dir, instances=6)
