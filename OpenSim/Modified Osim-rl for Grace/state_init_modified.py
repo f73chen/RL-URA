@@ -110,7 +110,7 @@ if __name__ ==  '__main__':
     # '''
     model = PPO.load(f"{d}/muscle_l{v}", env = env)
     obs = env.reset()
-    for i in range(100):
+    for i in range(1000):
         action, _state = model.predict(obs, deterministic=False)
         obs, reward, done, info = env.step(action)
         if done:
