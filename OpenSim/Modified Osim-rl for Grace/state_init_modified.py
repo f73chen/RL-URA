@@ -20,27 +20,27 @@ from stable_baselines3.common.callbacks import BaseCallback, EveryNTimesteps
 
 from osim.env.osimMod36d import L2RunEnvMod
 
-params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 10],
+params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0],
           #['forward', 'survival', 'torso', 'joint', 'stability', 'act', 'footstep', 'jerk', 'slide', 'mimic']
           'action_limit': [1]*18,
-          'time_limit': 1000,
+          'time_limit': 50,
           'stepsize': 0.01,
           'integrator_accuracy': 5e-5,
           'seed': 0,
-          'num_cpu': 1,
+          'num_cpu': 10,
           'lr_a1': 1.0e-4,
           'lr_a2': 2, 
-          'target_speed_range': [0.8,1.2],
+          'target_speed_range': [1.31, 1.31],
           'total_timesteps': 4000000}
 
-v = "v5_9"
+v = "v13"
 d = "muscle"
 log_dir = f"{d}/muscle_log_{v}/"
 tb_dir = log_dir + "tb/"
 os.makedirs(log_dir, exist_ok=True)
 
 def learning_rate(frac):
-    return 1.0e-5*(np.exp(6*(frac-1)))
+    return 1.0e-4*(np.exp(6*(frac-1)))
 
 def own_policy(obs):
     action = np.zeros(18)
@@ -128,7 +128,7 @@ if __name__ ==  '__main__':
                                 stepsize=params['stepsize'], 
                                 reward_weight = params['reward_weight'], 
                                 action_limit = params['action_limit'], 
-                                visualize=True,
+                                visualize=False,
                                 traj_path=traj_path,
                                 integrator_accuracy=params['integrator_accuracy'], 
                                 target_speed_range = params['target_speed_range'], 
@@ -147,18 +147,18 @@ if __name__ ==  '__main__':
     obs = env.reset()
 
 
-    '''
+    # '''
     policy_kwargs = dict(activation_fn=th.nn.Tanh,
                         net_arch=[dict(vf=[512,512,512,256], pi=[512,512,512,256])])     # v=5
-    model = PPO('MlpPolicy', env, verbose=0, policy_kwargs=policy_kwargs, learning_rate=learning_rate, n_steps=128, tensorboard_log=log_dir) # 
+    model = PPO('MlpPolicy', env, verbose=0, policy_kwargs=policy_kwargs, learning_rate=learning_rate, n_steps=128) # , tensorboard_log=log_dir
     # model = PPO.load(f"{d}/muscle_lv5", env = env)
     model.learn(total_timesteps=params['total_timesteps'], callback=event_callback)
 
     # Test saving and loading
     model.save(f"{d}/muscle_l{v}")
     del model
-    '''
     # '''
+    '''
     model = PPO.load(f"{d}/muscle_l{v}", env = env)
     obs = env.reset()
     for i in range(1000):
@@ -167,7 +167,7 @@ if __name__ ==  '__main__':
         obs, reward, done, info = env.step(action)
         if done:
             obs = env.reset()
-    # '''
+    '''
 
     # for i in range(100):
     #     o, r, d, i = env.step(np.zeros(18))

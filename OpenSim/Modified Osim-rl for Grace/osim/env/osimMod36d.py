@@ -522,7 +522,7 @@ class L2RunEnvMod(L2RunEnvRSI):
         self.traj_idx = (self.traj_idx + 1) % len(self.traj)
 
         #########################################################
-        self.reward_list = np.array([1.*forward_reward_exp,
+        self.reward_list = np.array([1.*forward_reward_qua,
                                         1.*survival_reward, 
                                         1.*torso_reward, 
                                         1.*joint_reward, 
@@ -534,7 +534,7 @@ class L2RunEnvMod(L2RunEnvRSI):
                                         1.*mimic_reward])
 
         if np.random.randint(0, 10) == 0:
-            print(f"Current reward: {self.reward_weight@self.reward_list}")
+            print(f"Total: {self.reward_weight@self.reward_list}, Forward: {forward_reward_qua}, Mimic: {mimic_reward}")
         
         return self.reward_weight@self.reward_list
         
