@@ -27,13 +27,13 @@ params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 10],
           'stepsize': 0.01,
           'integrator_accuracy': 5e-5,
           'seed': 0,
-          'num_cpu': 8,
+          'num_cpu': 12,
           'lr_a1': 1.0e-4,
           'lr_a2': 2, 
           'target_speed_range': [0.8,1.2],
           'total_timesteps': 1000000}
 
-v = "v11"
+v = "v12"
 d = "muscle"
 log_dir = f"{d}/muscle_log_{v}/"
 tb_dir = log_dir + "tb/"
@@ -152,17 +152,17 @@ if __name__ ==  '__main__':
     # print(env.init_space)
 
     # Decrease mimic reward over time
-    iter_params = [{'time_limit': 20, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 8.0]},
-                   {'time_limit': 30, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 5.0]},
-                   {'time_limit': 40, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 3.0]},
-                   {'time_limit': 50, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 2.0]}]
+    iter_params = [{'time_limit': 20, 'reward_weight': [3.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 0.0]},
+                   {'time_limit': 30, 'reward_weight': [4.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 2.0]},
+                   {'time_limit': 40, 'reward_weight': [5.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 4.0]},
+                   {'time_limit': 50, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 6.0]}]
     envs = [iter_env(**ip) for ip in iter_params]
 
     # '''
     policy_kwargs = dict(activation_fn=th.nn.Tanh,
                         net_arch=[dict(vf=[512,512,512,256], pi=[512,512,512,256])])
     
-    model = PPO('MlpPolicy', envs[0], verbose=0, policy_kwargs=policy_kwargs, learning_rate=learning_rate, n_steps=128) # , tensorboard_log=log_dir
+    model = PPO('MlpPolicy', envs[0], verbose=0, policy_kwargs=policy_kwargs, learning_rate=learning_rate, n_steps=128, tensorboard_log=log_dir) # 
     for i in range(len(envs)):
         obs = envs[i].reset()
         if i > 0:
