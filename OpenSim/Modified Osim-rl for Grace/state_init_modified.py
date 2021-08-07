@@ -27,7 +27,7 @@ params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0],
           'stepsize': 0.01,
           'integrator_accuracy': 5e-5,
           'seed': 0,
-          'num_cpu': 10,
+          'num_cpu': 12,
           'lr_a1': 1.0e-4,
           'lr_a2': 2, 
           'target_speed_range': [1.31, 1.31],
@@ -147,18 +147,18 @@ if __name__ ==  '__main__':
     obs = env.reset()
 
 
-    # '''
+    '''
     policy_kwargs = dict(activation_fn=th.nn.Tanh,
-                        net_arch=[dict(vf=[512,512,512,256], pi=[512,512,512,256])])     # v=5
-    model = PPO('MlpPolicy', env, verbose=0, policy_kwargs=policy_kwargs, learning_rate=learning_rate, n_steps=128) # , tensorboard_log=log_dir
+                        net_arch=[dict(vf=[512,512,512,256], pi=[512,512,512,256])])
+    model = PPO('MlpPolicy', env, verbose=0, policy_kwargs=policy_kwargs, learning_rate=learning_rate, n_steps=128, tensorboard_log=log_dir) # 
     # model = PPO.load(f"{d}/muscle_lv5", env = env)
     model.learn(total_timesteps=params['total_timesteps'], callback=event_callback)
 
     # Test saving and loading
     model.save(f"{d}/muscle_l{v}")
     del model
-    # '''
     '''
+    # '''
     model = PPO.load(f"{d}/muscle_l{v}", env = env)
     obs = env.reset()
     for i in range(1000):
@@ -167,7 +167,7 @@ if __name__ ==  '__main__':
         obs, reward, done, info = env.step(action)
         if done:
             obs = env.reset()
-    '''
+    # '''
 
     # for i in range(100):
     #     o, r, d, i = env.step(np.zeros(18))

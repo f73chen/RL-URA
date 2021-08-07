@@ -534,7 +534,7 @@ class L2RunEnvMod(L2RunEnvRSI):
                                         1.*mimic_reward])
 
         if np.random.randint(0, 10) == 0:
-            print(f"Total: {self.reward_weight@self.reward_list}, Forward: {forward_reward_qua}, Mimic: {mimic_reward}")
+            print(f"Total: {self.reward_weight@self.reward_list}, Forward: {self.reward_weight[0]*forward_reward_qua}, Mimic: {self.reward_weight[-1]*mimic_reward}")
         
         return self.reward_weight@self.reward_list
         
