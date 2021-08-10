@@ -71,7 +71,7 @@ def make_env(env_in, rank, time_limit, seed=0, stepsize=0.01, **kwargs):
     return _init
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-traj_path = dir_path + "\\" + "tracking_solution_fullStride.sto"
+traj_path = dir_path + "\\" + "traj" + "\\" + "tracking_solution_fullStride.sto"
 
 
 
