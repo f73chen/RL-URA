@@ -27,13 +27,13 @@ params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0],
           'stepsize': 0.01,
           'integrator_accuracy': 5e-5,
           'seed': 0,
-          'num_cpu': 10,
+          'num_cpu': 12,
           'lr_a1': 1.0e-4,
           'lr_a2': 2, 
-          'target_speed_range': [1.0, 1.0],
+          'target_speed_range': [1.2, 1.2],
           'total_timesteps': 1000000}
 
-v = "v15"
+v = "v16"
 d = "muscle"
 log_dir = f"{d}/muscle_log_{v}/"
 tb_dir = log_dir + "tb/"
@@ -71,7 +71,7 @@ def make_env(env_in, rank, time_limit, seed=0, stepsize=0.01, **kwargs):
     return _init
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-traj_path = dir_path + "\\traj\\" + "1.0_gaitPrediction_solution_fullStride.sto"
+traj_path = dir_path + "\\traj\\" + "1.2_gaitPrediction_solution_fullStride.sto"
 
 
 
@@ -162,7 +162,7 @@ if __name__ ==  '__main__':
     policy_kwargs = dict(activation_fn=th.nn.Tanh,
                         net_arch=[dict(vf=[512,512,512,256], pi=[512,512,512,256])])
     
-    model = PPO('MlpPolicy', envs[0], verbose=0, policy_kwargs=policy_kwargs, learning_rate=learning_rate, n_steps=128) # , tensorboard_log=log_dir
+    model = PPO('MlpPolicy', envs[0], verbose=0, policy_kwargs=policy_kwargs, learning_rate=learning_rate, n_steps=128, tensorboard_log=log_dir) # 
     for i in range(len(envs)):
         obs = envs[i].reset()
         if i > 0:
