@@ -29,11 +29,11 @@ params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0],
           'seed': 0,
           'num_cpu': 10,
           'lr_a1': 1.0e-4,
-          'lr_a2': 2, 
+          'lr_a2': 2,
           'target_speed_range': [1.0, 1.0],
           'total_timesteps': 1000000}
 
-v = "v18"
+v = "v17"
 d = "muscle"
 log_dir = f"{d}/muscle_log_{v}/"
 tb_dir = log_dir + "tb/"
@@ -49,18 +49,18 @@ def own_policy(obs):
 def make_env(env_in, rank, time_limit, seed=0, stepsize=0.01, **kwargs):
     """
     Utility function for multiprocessed env.
-    
+
     :param env_id: (str) the environment ID
-    :param num_env: (int) the number of environment you wish to have in subprocesses 
+    :param num_env: (int) the number of environment you wish to have in subprocesses
     :param seed: (int) the inital seed for RNG
     :param rank: (int) index of the subprocess
     """
     # if os.path.exists(log_dir + '/env_0/monitor.csv'):
     #     raise Exception("existing monitor files found!!!")
-    
+
     def _init():
         env_in.time_limit = time_limit
-        env = env_in(**kwargs) 
+        env = env_in(**kwargs)
         env.osim_model.stepsize = stepsize
         log_sub_dir = log_dir + '/env_{}'.format(str(rank))
         os.makedirs(log_sub_dir, exist_ok=True)
@@ -82,7 +82,7 @@ def extract_xy(log_dir, num_rollout):
             _, y_tmp = ts2xy(load_results(log_dir+folder), 'timesteps')
             if len(y_tmp) > 0:
                 y.extend(list(y_tmp[-num_rollout:]))
-    y = sum(y)/len(y) if len(y) > 0 else -np.inf 
+    y = sum(y)/len(y) if len(y) > 0 else -np.inf
     return y
 
 class LogCallback(BaseCallback):
@@ -116,36 +116,36 @@ class LogCallback(BaseCallback):
                 print("Saving latest model")
                 self.model.save(self.log_dir + 'latest_model')
         return True
-    
+
 log_callback = LogCallback(log_dir, num_rollout=5)
 event_callback = EveryNTimesteps(n_steps=2000, callback=log_callback)
 
 def iter_env(time_limit, reward_weight):
-    env = SubprocVecEnv([make_env(L2RunEnvMod, i, time_limit, 
-                                    seed=params['seed'], 
-                                    stepsize=params['stepsize'], 
-                                    reward_weight = reward_weight, 
-                                    action_limit = params['action_limit'], 
+    env = SubprocVecEnv([make_env(L2RunEnvMod, i, time_limit,
+                                    seed=params['seed'],
+                                    stepsize=params['stepsize'],
+                                    reward_weight = reward_weight,
+                                    action_limit = params['action_limit'],
                                     visualize=False,
                                     traj_path=traj_path,
-                                    integrator_accuracy=params['integrator_accuracy'], 
-                                    target_speed_range = params['target_speed_range'], 
-                                    own_policy=own_policy) 
+                                    integrator_accuracy=params['integrator_accuracy'],
+                                    target_speed_range = params['target_speed_range'],
+                                    own_policy=own_policy)
                             for i in range(params['num_cpu'])])
     return env
 
 
 if __name__ ==  '__main__':
-    # env = SubprocVecEnv([make_env(L2RunEnvMod, i, params['time_limit'], 
-    #                             seed=params['seed'], 
-    #                             stepsize=params['stepsize'], 
-    #                             reward_weight = params['reward_weight'], 
-    #                             action_limit = params['action_limit'], 
+    # env = SubprocVecEnv([make_env(L2RunEnvMod, i, params['time_limit'],
+    #                             seed=params['seed'],
+    #                             stepsize=params['stepsize'],
+    #                             reward_weight = params['reward_weight'],
+    #                             action_limit = params['action_limit'],
     #                             visualize=True,
     #                             traj_path=traj_path,
-    #                             integrator_accuracy=params['integrator_accuracy'], 
-    #                             target_speed_range = params['target_speed_range'], 
-    #                             own_policy=own_policy) 
+    #                             integrator_accuracy=params['integrator_accuracy'],
+    #                             target_speed_range = params['target_speed_range'],
+    #                             own_policy=own_policy)
     #                     for i in range(params['num_cpu'])])
 
     # print(env.observation_space)    # Box(0.0, 0.0, (36,), float32)
@@ -161,7 +161,7 @@ if __name__ ==  '__main__':
 
     policy_kwargs = dict(activation_fn=th.nn.Tanh,
                         net_arch=[dict(vf=[512,512,512,256], pi=[512,512,512,256])])
-    
+
     model = PPO('MlpPolicy', envs[0], verbose=0, policy_kwargs=policy_kwargs, learning_rate=learning_rate, n_steps=128) # , tensorboard_log=log_dir
     for i in range(len(envs)):
         obs = envs[i].reset()
@@ -218,7 +218,7 @@ def plot_results(log_folder, title='Learning Curve', instances=1, same_plot=Fals
             else:
                 y = y + y_tmp[:len(y)]
         y = y/instances
-    
+
     y = moving_average(y, window=5) # change window value to change level of smoothness
     # Truncate x
     x = x[len(x) - len(y):]
