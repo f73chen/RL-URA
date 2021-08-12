@@ -30,10 +30,10 @@ params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0],
           'num_cpu': 10,
           'lr_a1': 1.0e-4,
           'lr_a2': 2,
-          'target_speed_range': [1.0, 1.0],
+          'target_speed_range': [1.2, 1.2],
           'total_timesteps': 1000000}
 
-v = "v17"
+v = "v19"
 d = "muscle"
 log_dir = f"{d}/muscle_log_{v}/"
 tb_dir = log_dir + "tb/"
@@ -71,7 +71,7 @@ def make_env(env_in, rank, time_limit, seed=0, stepsize=0.01, **kwargs):
     return _init
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-traj_path = dir_path + "\\traj\\" + "1.0_gaitPrediction_solution_fullStride.sto"
+traj_path = dir_path + "\\traj\\" + "1.2_gaitPrediction_solution_fullStride.sto"
 
 
 
@@ -153,10 +153,11 @@ if __name__ ==  '__main__':
 
     # '''
     # Decrease mimic reward over time
-    iter_params = [{'time_limit': 30, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 6.0]},
-                   {'time_limit': 45, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 4.5]},
-                   {'time_limit': 60, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 3.0]},
-                   {'time_limit': 70, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 2.0]}]
+    iter_params = [{'time_limit': 30, 'reward_weight': [3.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 3.0]},
+                   {'time_limit': 45, 'reward_weight': [2.5, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 2.0]},
+                   {'time_limit': 60, 'reward_weight': [2.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0]},
+                   {'time_limit': 70, 'reward_weight': [1.5, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 0.5]}]
+
     envs = [iter_env(**ip) for ip in iter_params]
 
     policy_kwargs = dict(activation_fn=th.nn.Tanh,
