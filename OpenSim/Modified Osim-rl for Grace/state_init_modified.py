@@ -33,7 +33,7 @@ params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0],
           'target_speed_range': [1.2, 1.2],
           'total_timesteps': 1000000}
 
-v = "v16"
+v = "v17"
 d = "muscle"
 log_dir = f"{d}/muscle_log_{v}/"
 tb_dir = log_dir + "tb/"
@@ -153,10 +153,10 @@ if __name__ ==  '__main__':
 
     # '''
     # Decrease mimic reward over time
-    iter_params = [{'time_limit': 30, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 3.0]},
-                   {'time_limit': 45, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 2.0]},
-                   {'time_limit': 60, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0]},
-                   {'time_limit': 70, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 0.5]}]
+    iter_params = [{'time_limit': 30, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 6.0]},
+                   {'time_limit': 45, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 4.5]},
+                   {'time_limit': 60, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 3.0]},
+                   {'time_limit': 70, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 2.0]}]
     envs = [iter_env(**ip) for ip in iter_params]
 
     policy_kwargs = dict(activation_fn=th.nn.Tanh,
