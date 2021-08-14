@@ -265,23 +265,29 @@ class OsimEnvRSI(OsimEnv):
         self.action_space = convert_to_gym(self.action_space)
         self.observation_space = convert_to_gym(self.observation_space)
        
-    def traj_from_idx(self):
-        ref_state = self.traj.iloc[self.traj_idx, :]
+    def next_traj(self):
+        idx = self.traj_idx % (len(self.traj) - 1)
+        ref_state = self.traj.iloc[idx, :]
 
         init_coords = ref_state.iloc[1:10]
         init_coords = [init_coords[self.osim_model.model.getCoordinateSet().get(i).getName() + "/value"] for i in range(9)]
+        
+        pelvis_diff = self.traj.iloc[len(self.traj)-1, 2] - self.traj.iloc[0, 2]
+        init_coords[1] = init_coords[1] + int(self.traj_idx / (len(self.traj) - 1)) * pelvis_diff
         
         init_speeds = ref_state.iloc[10:19]
         init_speeds = [init_speeds[self.osim_model.model.getCoordinateSet().get(i).getName() + "/speed"] for i in range(9)]
 
         init_activations = list(ref_state.iloc[19:37])
 
+        self.traj_idx += 1
+
         return init_coords, init_speeds, init_activations
 
     def reset(self, project = True):
         # Choose random state to init model with
         self.traj_idx = np.random.randint(0, len(self.traj))
-        self.init_coords, self.init_speeds, self.init_activations = self.traj_from_idx()
+        self.init_coords, self.init_speeds, self.init_activations = self.next_traj()
         
         self.load_model(self.init_coords, self.init_speeds)
         self.osim_model.reset(self.init_activations)
@@ -517,9 +523,9 @@ class L2RunEnvMod(L2RunEnvRSI):
         #########################################################
 
         # Works! Mimic_reward accumulation slows down when the counter is implemented
-        curr_ref_coords, _, _ = self.traj_from_idx()
+        # Cut before the last idx because the first and last lines are the same
+        curr_ref_coords, _, _ = self.next_traj()
         mimic_reward = get_mimic_reward(state_desc, curr_ref_coords, dt)
-        self.traj_idx = (self.traj_idx + 1) % len(self.traj)
 
         #########################################################
         self.reward_list = np.array([1.*forward_reward_qua,
