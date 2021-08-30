@@ -138,11 +138,9 @@ if __name__ ==  '__main__':
     # Makes a new environment for each iteration
     iter_params = [{'time_limit': 30,   'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 3.5]},
                    {'time_limit': 60,   'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 3.0]},
-                   {'time_limit': 90,   'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 2.5]},
-                   {'time_limit': 120,  'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 2.0]},
-                   {'time_limit': 150,  'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 1.5]},
-                   {'time_limit': 250,  'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0]},
-                   {'time_limit': 1000, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 0.5]}]
+                   {'time_limit': 120,  'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 2.5]},
+                   {'time_limit': 300,  'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 1.5]},
+                   {'time_limit': 1000, 'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0]}]
 
     envs = [iter_env(**ip) for ip in iter_params]
 
