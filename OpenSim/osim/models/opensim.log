@@ -1,5 +1,0 @@
-[2021-06-21 16:19:42.570] [info] Updating Model file from 30000 to latest format...
-[2021-06-21 16:19:42.587] [info] Loaded model gait9dof18musc from file C:\Users\User\source\repos\RL-URA\OpenSim\osim\models\gait9dof18musc_20170320.osim
-[2021-06-21 16:19:42.592] [warning] JointSet 'jointset' has subcomponents with duplicate name 'back'. The duplicate is being renamed to 'back_0'.
-[2021-06-21 16:19:42.593] [info] ControllerSet 'Controllers' was renamed and is being reset to 'controllerset'.
-[2021-06-21 16:19:42.593] [info] ComponentSet 'MiscComponents' was renamed and is being reset to 'componentset'.
