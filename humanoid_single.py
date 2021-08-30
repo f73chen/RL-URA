@@ -24,28 +24,16 @@ env.render()
 def learning_rate(frac):
     return 1.0e-4*(np.exp(6*(frac-1)))
 
-# policy_kwargs = dict(activation_fn=th.nn.Tanh,
-#                      net_arch=[dict(pi=[256,256,192,128], vf=[256,256,192,128])])     # v=6
-
-# policy_kwargs = dict(activation_fn=th.nn.Tanh,
-#                      net_arch=[dict(pi=[64,64,32], vf=[64,64,32])])                   # v=7
-
-# policy_kwargs = dict(activation_fn=th.nn.Tanh,
-#                      net_arch=[dict(pi=[256,256,192,128], vf=[256,256,192,128])])     # v=8
-# model = PPO('MlpPolicy', env, verbose=0, policy_kwargs=policy_kwargs, tensorboard_log=log_path)     # default (constant) learning rate
-
-# policy_kwargs = dict(activation_fn=th.nn.Tanh,
-#                      net_arch=[dict(pi=[1024,1024,512,512], vf=[1024,1024,512,512])]) # v=9
-
-policy_kwargs = dict(activation_fn=th.nn.ReLU,                                          # ReLU instead of Tanh
-                     net_arch=[dict(pi=[256,256,192,128], vf=[256,256,192,128])])       # v=10
+# '''
+policy_kwargs = dict(activation_fn=th.nn.ReLU,
+                     net_arch=[dict(pi=[256,256,192,128], vf=[256,256,192,128])])
 model = PPO('MlpPolicy', env, verbose=0, policy_kwargs=policy_kwargs, learning_rate=learning_rate, tensorboard_log=log_path)
 model.learn(total_timesteps=8000000)
 
 # Test saving and loading
 model.save(f"{d}/humanoid_l{v}")
 del model
-
+# '''
 
 '''
 model = PPO.load(f"{d}/humanoid_l{v}", env = env)

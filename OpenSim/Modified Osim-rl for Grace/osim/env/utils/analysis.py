@@ -1,4 +1,5 @@
-from tqdm.notebook import tqdm
+# from tqdm.notebook import tqdm
+from tqdm import tqdm
 import numpy as np
 import os
 import bz2
@@ -726,8 +727,8 @@ class gaitAnalysis():
             ankle_exp = pd.concat([data_inter.iloc[:,0:1], data_inter.iloc[:,7:10]], axis=1, join="inner")
         elif mode == 'Moco':
             hip_exp = pd.concat([data_inter.iloc[:,0:1], data_inter.iloc[:,5:6]], axis=1, join="inner")
-            knee_exp = pd.concat([data_inter.iloc[:,0:1], data_inter.iloc[:,8:9]], axis=1, join="inner")
-            ankle_exp = pd.concat([data_inter.iloc[:,0:1], data_inter.iloc[:,10:11]], axis=1, join="inner")
+            knee_exp = pd.concat([data_inter.iloc[:,0:1], data_inter.iloc[:,7:8]], axis=1, join="inner")
+            ankle_exp = pd.concat([data_inter.iloc[:,0:1], data_inter.iloc[:,9:10]], axis=1, join="inner")
         elif mode == 'Osim':
             hip_exp = pd.concat([data_inter.iloc[:,0:1], data_inter.iloc[:,7:8]], axis=1, join="inner")
             knee_exp = pd.concat([data_inter.iloc[:,0:1], data_inter.iloc[:,9:10]], axis=1, join="inner")
