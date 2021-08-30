@@ -20,10 +20,10 @@ from stable_baselines3.common.callbacks import BaseCallback, EveryNTimesteps
 
 from osim.env.osimMod36d import L2RunEnvMod
 
-params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0],
+params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0],  # Weights change between iterations (ignore this)
           #['forward', 'survival', 'torso', 'joint', 'stability', 'act', 'footstep', 'jerk', 'slide', 'mimic']
           'action_limit': [1]*18,
-          'time_limit': 120,
+          'time_limit': 120,    # Time limit changes between iterations (ignore this)
           'stepsize': 0.01,
           'integrator_accuracy': 5e-5,
           'seed': 0,
@@ -33,8 +33,8 @@ params = {'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0],
           'target_speed_range': [1.2, 1.2],
           'total_timesteps': 4000000}
 
-v = "v21"
-d = "muscle"
+v = "v21"       # Log version number: change this for each run
+d = "muscle"    # Log dir for both tensorboard and model zip files
 log_dir = f"{d}/muscle_log_{v}/"
 tb_dir = log_dir + "tb/"
 os.makedirs(log_dir, exist_ok=True)
@@ -55,9 +55,6 @@ def make_env(env_in, rank, time_limit, seed=0, stepsize=0.01, **kwargs):
     :param seed: (int) the inital seed for RNG
     :param rank: (int) index of the subprocess
     """
-    # if os.path.exists(log_dir + '/env_0/monitor.csv'):
-    #     raise Exception("existing monitor files found!!!")
-
     def _init():
         env_in.time_limit = time_limit
         env = env_in(**kwargs)
@@ -70,9 +67,9 @@ def make_env(env_in, rank, time_limit, seed=0, stepsize=0.01, **kwargs):
     set_random_seed(seed)
     return _init
 
+# Path to trajectory file; make sure speeds match with target speed range
 dir_path = os.path.dirname(os.path.realpath(__file__))
 traj_path = dir_path + "\\traj\\" + "1.2_gaitPrediction_solution_fullStride.sto"
-
 
 
 def extract_xy(log_dir, num_rollout):
@@ -136,23 +133,9 @@ def iter_env(time_limit, reward_weight):
 
 
 if __name__ ==  '__main__':
-    # env = SubprocVecEnv([make_env(L2RunEnvMod, i, params['time_limit'],
-    #                             seed=params['seed'],
-    #                             stepsize=params['stepsize'],
-    #                             reward_weight = params['reward_weight'],
-    #                             action_limit = params['action_limit'],
-    #                             visualize=True,
-    #                             traj_path=traj_path,
-    #                             integrator_accuracy=params['integrator_accuracy'],
-    #                             target_speed_range = params['target_speed_range'],
-    #                             own_policy=own_policy)
-    #                     for i in range(params['num_cpu'])])
 
-    # print(env.observation_space)    # Box(0.0, 0.0, (36,), float32)
-    # print(env.init_space)
-
-    # '''
-    # Decrease mimic reward over time
+    # '''   ### TRAIN ###
+    # Makes a new environment for each iteration
     iter_params = [{'time_limit': 30,   'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 3.5]},
                    {'time_limit': 60,   'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 3.0]},
                    {'time_limit': 90,   'reward_weight': [6.0, 1.0, 1.0, 0.4, 0.0, 1.0, 1.0, 0.0, 0.5, 2.5]},
@@ -176,7 +159,8 @@ if __name__ ==  '__main__':
 
     del model
     # '''
-    '''
+
+    ''' ### DISPLAY ###
     env = iter_env(time_limit=params['time_limit'], reward_weight=params['reward_weight'])
     model = PPO.load(f"{d}/muscle_l{v}", env = env)
     obs = env.reset()
@@ -188,11 +172,8 @@ if __name__ ==  '__main__':
             obs = env.reset()
     '''
 
-    # for i in range(100):
-    #     o, r, d, i = env.step(np.zeros(18))
 
-
-
+'''
 def moving_average(values, window):
     """
     Smooth values by doing a moving average
@@ -234,4 +215,5 @@ def plot_results(log_folder, title='Learning Curve', instances=1, same_plot=Fals
     if same_plot is False:
         plt.show()
 
-# plot_results(log_dir, instances=6)
+plot_results(log_dir, instances=6)
+'''
