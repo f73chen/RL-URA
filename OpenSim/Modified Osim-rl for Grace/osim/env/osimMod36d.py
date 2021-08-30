@@ -539,9 +539,11 @@ class L2RunEnvMod(L2RunEnvRSI):
                                         1.*slide_reward,
                                         1.*mimic_reward])
 
+        ''' ### DISPLAY REWARDS ###
         if np.random.randint(0, 10) == 0:
             print(f"Total: {self.reward_weight@self.reward_list}, Forward: {self.reward_weight[0]*forward_reward_qua}, Mimic: {self.reward_weight[-1]*mimic_reward}")
-        
+        '''
+
         return self.reward_weight@self.reward_list
         
         
