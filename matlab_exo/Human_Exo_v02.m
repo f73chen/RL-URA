@@ -529,7 +529,6 @@ classdef Human_Exo_v02 < handle
             u = obj.InternalControl(r);
             tt=obj.state.getTime();
             if mod(round(tt,5),obj.upT)==0
-%                 tt
                 
                 obj.outPut=[obj.outPut;[obj.getOutPut(), u']];
                 obj.model.getVisualizer().show(obj.state)

@@ -7,7 +7,7 @@ import opensim
 import random
 
 ## OpenSim interface
-# The amin purpose of this class is to provide wrap all 
+# The main purpose of this class is to provide wrap all 
 # the necessery elements of OpenSim in one place
 # The actual RL environment then only needs to:
 # - open a model

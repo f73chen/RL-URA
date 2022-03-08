@@ -1,0 +1,50 @@
+[2022-03-07 19:54:52.004] [info] Loaded model subject01 from file sub_01_contact.osim
+[2022-03-07 19:54:52.111] [warning] ForceSet 'forceset' has subcomponents with duplicate name 'p'. The duplicate is being renamed to 'p_0'.
+[2022-03-07 19:54:52.116] [warning] ForceSet 'forceset' has subcomponents with duplicate name 'p'. The duplicate is being renamed to 'p_1'.
+[2022-03-07 19:54:52.192] [error] Mesh exo_body.STL not connected to model...ignoring
+[2022-03-07 19:54:52.197] [error] Mesh exo_thigh_left.STL not connected to model...ignoring
+[2022-03-07 19:54:52.203] [error] Mesh exo_thigh_right.STL not connected to model...ignoring
+[2022-03-07 19:54:52.208] [error] Mesh exo_shank_left.STL not connected to model...ignoring
+[2022-03-07 19:54:52.214] [error] Mesh exo_shank_right.STL not connected to model...ignoring
+[2022-03-07 19:54:52.219] [error] Mesh exo_foot_left.STL not connected to model...ignoring
+[2022-03-07 19:54:52.227] [error] Mesh exo_foot_right.STL not connected to model...ignoring
+[2022-03-07 19:56:11.514] [info] Loaded model subject01 from file sub_01_contact.osim
+[2022-03-07 19:56:11.571] [warning] ForceSet 'forceset' has subcomponents with duplicate name 'p'. The duplicate is being renamed to 'p_0'.
+[2022-03-07 19:56:11.575] [warning] ForceSet 'forceset' has subcomponents with duplicate name 'p'. The duplicate is being renamed to 'p_1'.
+[2022-03-07 19:56:11.657] [error] Mesh exo_body.STL not connected to model...ignoring
+[2022-03-07 19:56:11.662] [error] Mesh exo_thigh_left.STL not connected to model...ignoring
+[2022-03-07 19:56:11.667] [error] Mesh exo_thigh_right.STL not connected to model...ignoring
+[2022-03-07 19:56:11.671] [error] Mesh exo_shank_left.STL not connected to model...ignoring
+[2022-03-07 19:56:11.676] [error] Mesh exo_shank_right.STL not connected to model...ignoring
+[2022-03-07 19:56:11.681] [error] Mesh exo_foot_left.STL not connected to model...ignoring
+[2022-03-07 19:56:11.686] [error] Mesh exo_foot_right.STL not connected to model...ignoring
+[2022-03-07 20:00:40.052] [info] Loaded model subject01 from file sub_01_contact.osim
+[2022-03-07 20:00:40.119] [warning] ForceSet 'forceset' has subcomponents with duplicate name 'p'. The duplicate is being renamed to 'p_0'.
+[2022-03-07 20:00:40.124] [warning] ForceSet 'forceset' has subcomponents with duplicate name 'p'. The duplicate is being renamed to 'p_1'.
+[2022-03-07 20:00:40.180] [error] Mesh exo_body.STL not connected to model...ignoring
+[2022-03-07 20:00:40.184] [error] Mesh exo_thigh_left.STL not connected to model...ignoring
+[2022-03-07 20:00:40.189] [error] Mesh exo_thigh_right.STL not connected to model...ignoring
+[2022-03-07 20:00:40.193] [error] Mesh exo_shank_left.STL not connected to model...ignoring
+[2022-03-07 20:00:40.198] [error] Mesh exo_shank_right.STL not connected to model...ignoring
+[2022-03-07 20:00:40.203] [error] Mesh exo_foot_left.STL not connected to model...ignoring
+[2022-03-07 20:00:40.208] [error] Mesh exo_foot_right.STL not connected to model...ignoring
+[2022-03-07 20:00:50.450] [info] Loaded model subject01 from file sub_01_contact.osim
+[2022-03-07 20:00:50.506] [warning] ForceSet 'forceset' has subcomponents with duplicate name 'p'. The duplicate is being renamed to 'p_0'.
+[2022-03-07 20:00:50.510] [warning] ForceSet 'forceset' has subcomponents with duplicate name 'p'. The duplicate is being renamed to 'p_1'.
+[2022-03-07 20:00:50.557] [error] Mesh exo_body.STL not connected to model...ignoring
+[2022-03-07 20:00:50.562] [error] Mesh exo_thigh_left.STL not connected to model...ignoring
+[2022-03-07 20:00:50.567] [error] Mesh exo_thigh_right.STL not connected to model...ignoring
+[2022-03-07 20:00:50.571] [error] Mesh exo_shank_left.STL not connected to model...ignoring
+[2022-03-07 20:00:50.576] [error] Mesh exo_shank_right.STL not connected to model...ignoring
+[2022-03-07 20:00:50.581] [error] Mesh exo_foot_left.STL not connected to model...ignoring
+[2022-03-07 20:00:50.586] [error] Mesh exo_foot_right.STL not connected to model...ignoring
+[2022-03-07 20:01:13.053] [info] Loaded model subject01 from file sub_01_contact.osim
+[2022-03-07 20:01:13.116] [warning] ForceSet 'forceset' has subcomponents with duplicate name 'p'. The duplicate is being renamed to 'p_0'.
+[2022-03-07 20:01:13.120] [warning] ForceSet 'forceset' has subcomponents with duplicate name 'p'. The duplicate is being renamed to 'p_1'.
+[2022-03-07 20:01:13.169] [error] Mesh exo_body.STL not connected to model...ignoring
+[2022-03-07 20:01:13.174] [error] Mesh exo_thigh_left.STL not connected to model...ignoring
+[2022-03-07 20:01:13.178] [error] Mesh exo_thigh_right.STL not connected to model...ignoring
+[2022-03-07 20:01:13.183] [error] Mesh exo_shank_left.STL not connected to model...ignoring
+[2022-03-07 20:01:13.188] [error] Mesh exo_shank_right.STL not connected to model...ignoring
+[2022-03-07 20:01:13.193] [error] Mesh exo_foot_left.STL not connected to model...ignoring
+[2022-03-07 20:01:13.197] [error] Mesh exo_foot_right.STL not connected to model...ignoring

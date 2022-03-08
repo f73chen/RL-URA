@@ -7,27 +7,28 @@ muscleSet = {'hamstrings_r','bifemsh_r','glut_max_r','iliopsoas_r','rect_fem_r',
 d2r = pi/180;
 %% simulation parameters
 for i = 1 
-    dt_0 = 0.002;     % controller update referesh rate
+    dt_0 = 0.002;   % controller update referesh rate
     updT = 0.01;    % save and GUI referesh rate
     phase = 0;      % initial phase of the motion. phase = 0 starts from the heel strike of the right leg
-    phi = 0.61595;  % right-left phase difference (it has to be always equal to 1.2319/2)
+    phi = 0.61595;  % right-left phase difference (it has to always be equal to 1.2319/2 seconds)
     
     exo_enable = 1; % add exo to the simulation
     mus_enable = 0; % add muscles to the simulations
-    T=60;           % simulation period
+    T = 60;           % simulation period
 end
+
 %% Controller and Force parameters
-for i = 1 %human parameters
+for i = 1   % human parameters
     pelvis_stiffness = .0*[500 0 0]; pelvis_damping = .0*[50 0 0];  % tilt,x,y
-    init_speed_gain =1;                                             % healthy human only
+    init_speed_gain = 1;                                            % healthy human only
     p_gain = 3*[[10 2 5] 1*[10 2 5] 15]*60;                         % internal controller P gain
-    d_gain = 2*[.3  0.1 0.1 .3 0.1 0.1 1]*60;                       % internal controller D gains
+    d_gain = 2*[.3  0.1 0.1 .3 0.1 0.1 1]*60;                       % internal controller D gain
     sat = 1*[500 500 500 500 500 500 500];                          % internal controller saturation level
 end
 
 %% initial states setting
 ref = href; % get the reference trajectory 
-for m=1:6
+for m = 1:6
     if ismember(m,[4,5,6])  % for the left leg we have phi instead of phase 
         % because we are using the same trajectory for the left leg as we
         % are using for the right leg. We only shift it by phi.
@@ -44,6 +45,7 @@ end
 
 x0.back = -0.42; % initial torso joint angle
 v0.back = 0;   % initial torso joint velocity
+
 %% initiating the simulation
 % get instance form Human_Exo class and call it sub
 sub = Human_Exo_v02(x0,v0,updT,p_gain,d_gain,sat,pelvis_stiffness,pelvis_damping,exo_enable, mus_enable);
@@ -57,13 +59,13 @@ end
 %% Simulation loop 
    
 for i = 1:(T/dt_0)+1
-    % comute simulation time
+    % compute simulation time
     t = (i-1)*dt_0; 
     % compute each leg's gait cycle and 
     [s_l,s_r,r_human] = GaitGen(t,href,motorSet,phase,phi); 
-    % update the modle for one step by passing the reference trajectory to
+    % update the model for one step by passing the reference trajectory to
     % the system. We pass the reference trajectory to the system because
-    % the iternal controllers of the system needs that. It is actually sets the
+    % the iternal controllers of the system needs that. It actually sets the
     % rest length for each joints spring. 
     sub.step(t+dt_0,f_exo,activation,r_human);
 end
