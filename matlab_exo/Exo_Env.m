@@ -27,13 +27,22 @@ classdef Exo_Env < handle
             env.model = Exo_Model(href, T, dt_0);
         end
 
+        % Calculate the overall reward weight as a function of time
+        % It's more important to follow the trajectory at some parts
+        % Ex. stance phase >> mid swing
+        % @@@ TODO: find a function to describe the weight
+        function timing_factor = GetTimingFactor(env, time)
+            timing_factor = 1;
+        end
+
         % Get the current reward for the state
         % Start with mimic reward based on trajectory (location of back)
         % @@@ TODO: add individual weights for each joint
         function reward = GetReward(env, time)
             obs = env.GetObservation();
             ref_obs = env.ref.back(time);
-            reward = (ref_obs - obs).^2;
+            timing_factor = env.GetTimingFactor(time);
+            reward = timing_factor * (ref_obs - obs).^2;
         end
         
         % Whether to end the simulation
@@ -77,7 +86,7 @@ classdef Exo_Env < handle
             for i = 1:(env.T/env.dt_0)+1
                 t = (i-1) * env.dt_0; 
                 [obs, reward, done] = env.Step(t, [0 0 0]);
-                disp(done);
+                disp(reward);
             end
         end
     end
