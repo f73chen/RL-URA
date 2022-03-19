@@ -37,10 +37,10 @@ classdef Exo_Env < handle
         end
         
         % Whether to end the simulation
-        % Stop if pelvis < 0.6m --> pos.ground_pelvis.x < 0.6
+        % Stop if pelvis < 0.6m --> pos.ground_pelvis.y < 0.6
         function done = IsDone(env)
             desc = env.GetStateDesc();
-            done = desc(2) < 0.6;
+            done = desc(3) < 0.6;
         end
 
         % Pass up the state description from the model
@@ -77,7 +77,7 @@ classdef Exo_Env < handle
             for i = 1:(env.T/env.dt_0)+1
                 t = (i-1) * env.dt_0; 
                 [obs, reward, done] = env.Step(t, [0 0 0]);
-                disp(reward);
+                disp(done);
             end
         end
     end
