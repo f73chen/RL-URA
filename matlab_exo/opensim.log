@@ -48,3 +48,23 @@
 [2022-03-07 20:01:13.188] [error] Mesh exo_shank_right.STL not connected to model...ignoring
 [2022-03-07 20:01:13.193] [error] Mesh exo_foot_left.STL not connected to model...ignoring
 [2022-03-07 20:01:13.197] [error] Mesh exo_foot_right.STL not connected to model...ignoring
+[2022-03-19 02:59:14.966] [info] Loaded model subject01 from file sub_01_contact.osim
+[2022-03-19 02:59:15.080] [warning] ForceSet 'forceset' has subcomponents with duplicate name 'p'. The duplicate is being renamed to 'p_0'.
+[2022-03-19 02:59:15.085] [warning] ForceSet 'forceset' has subcomponents with duplicate name 'p'. The duplicate is being renamed to 'p_1'.
+[2022-03-19 02:59:15.173] [error] Mesh exo_body.STL not connected to model...ignoring
+[2022-03-19 02:59:15.179] [error] Mesh exo_thigh_left.STL not connected to model...ignoring
+[2022-03-19 02:59:15.185] [error] Mesh exo_thigh_right.STL not connected to model...ignoring
+[2022-03-19 02:59:15.191] [error] Mesh exo_shank_left.STL not connected to model...ignoring
+[2022-03-19 02:59:15.197] [error] Mesh exo_shank_right.STL not connected to model...ignoring
+[2022-03-19 02:59:15.203] [error] Mesh exo_foot_left.STL not connected to model...ignoring
+[2022-03-19 02:59:15.209] [error] Mesh exo_foot_right.STL not connected to model...ignoring
+[2022-03-19 03:01:12.192] [info] Loaded model subject01 from file sub_01_contact.osim
+[2022-03-19 03:01:12.254] [warning] ForceSet 'forceset' has subcomponents with duplicate name 'p'. The duplicate is being renamed to 'p_0'.
+[2022-03-19 03:01:12.258] [warning] ForceSet 'forceset' has subcomponents with duplicate name 'p'. The duplicate is being renamed to 'p_1'.
+[2022-03-19 03:01:12.312] [error] Mesh exo_body.STL not connected to model...ignoring
+[2022-03-19 03:01:12.318] [error] Mesh exo_thigh_left.STL not connected to model...ignoring
+[2022-03-19 03:01:12.323] [error] Mesh exo_thigh_right.STL not connected to model...ignoring
+[2022-03-19 03:01:12.328] [error] Mesh exo_shank_left.STL not connected to model...ignoring
+[2022-03-19 03:01:12.334] [error] Mesh exo_shank_right.STL not connected to model...ignoring
+[2022-03-19 03:01:12.339] [error] Mesh exo_foot_left.STL not connected to model...ignoring
+[2022-03-19 03:01:12.346] [error] Mesh exo_foot_right.STL not connected to model...ignoring

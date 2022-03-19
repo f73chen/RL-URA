@@ -7,5 +7,5 @@ clear all;clc;close all;
 load href_new;
 
 %% Test: simulate the environment after turning it into a class
-env = Exo_Model();
-env.simulate();
+model = Exo_Model();
+model.Simulate();

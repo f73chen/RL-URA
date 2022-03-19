@@ -269,7 +269,7 @@ class Spec(object):
 # environments inherit from this one and:
 # - select the model file
 # - define the rewards and stopping conditions
-# - define an obsernvation as a function of state
+# - define an observation as a function of state
 class OsimEnv(gym.Env):
     action_space = None
     observation_space = None
