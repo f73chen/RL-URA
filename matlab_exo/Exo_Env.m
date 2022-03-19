@@ -6,29 +6,34 @@
 classdef Exo_Env < handle
     properties
         model
-        visualize
         ref
+
+        dt_0
+        T
     end
     methods
         % Constructor
-        function env = Exo_Env(visualize)
+        function env = Exo_Env()
             load href_new;
-            env.visualize = visualize;
             env.ref = href;
-            env.LoadModel();
+            env.T = 60;
+            env.dt_0 = 0.002;
+
+            env.LoadModel(env.ref, env.T, env.dt_0);
         end
 
         % Reset model parameters and load the model into the env
-        function LoadModel(env)
-            env.model = Exo_Model(env.ref);
+        function LoadModel(env, href, T, dt_0)
+            env.model = Exo_Model(href, T, dt_0);
         end
 
         % Get the current reward for the state
         % Start with mimic reward based on trajectory (location of back)
+        % @@@ TODO: add individual weights for each joint
         function reward = GetReward(env, time)
             obs = env.GetObservation();
-            ref_obs = href.back(time);
-            reward = (ref_obs - obs)^2;
+            ref_obs = env.ref.back(time);
+            reward = (ref_obs - obs).^2;
         end
         
         % Whether to end the simulation
@@ -47,7 +52,7 @@ classdef Exo_Env < handle
         % Depends on what variables the controller cares about
         function obs = GetObservation(env)
             desc = env.GetStateDesc();
-            obs = desc(2:19);   % Only all joint locations
+            obs = desc(2:19);   % Only observe joint locations
         end
 
         % Reset the environment
@@ -57,11 +62,23 @@ classdef Exo_Env < handle
         end
 
         % Calculate the next state based on actions predicted by RL
-        function [obs, reward, done] = Step(env, action)
-            % @@@ Actuate muscles & use model.sub.step()
+        % @@@ TODO: propagate action back to controller
+            % Update model based on action (exo input)
+        function [obs, reward, done] = Step(env, t, action)
+            % compute simulation time
+            env.model.Simulate(t);
             obs = env.GetObservation();
-            reward = env.GetReward();
+            reward = env.GetReward(t);
             done = env.IsDone();
+        end
+
+        % Step through the whole sequence
+        function Simulate(env)
+            for i = 1:(env.T/env.dt_0)+1
+                t = (i-1) * env.dt_0; 
+                [obs, reward, done] = env.Step(t, [0 0 0]);
+                disp(reward);
+            end
         end
     end
 end

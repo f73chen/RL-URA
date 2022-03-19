@@ -7,10 +7,10 @@ classdef Exo_Model < handle
         muscleSet
         d2r
 
-        dt_0
         updT
         phase
         phi
+        dt_0
 
         exo_enable
         mus_enable
@@ -33,18 +33,18 @@ classdef Exo_Model < handle
     end
     methods
         % Constructor
-        function model = Exo_Model(ref)
+        function model = Exo_Model(href, T, dt_0)
             % Constants and params:
             model.motorSet = {'hip_r','knee_r','ankle_r','hip_l','knee_l','ankle_l','back'};
             model.muscleSet = {'hamstrings_r','bifemsh_r','glut_max_r','iliopsoas_r','rect_fem_r','vasti_r','gastroc_r','soleus_r','tib_ant_r','hamstrings_l','bifemsh_l','glut_max_l','iliopsoas_l','rect_fem_l','vasti_l','gastroc_l','soleus_l','tib_ant_l'};
             model.d2r = pi/180;
     
             % Simulation parameters
-            model.dt_0 = 0.002;   % controller update referesh rate
             model.updT = 0.01;    % save and GUI referesh rate
             model.phase = 0;      % initial phase of the motion. phase = 0 starts from the heel strike of the right leg
             model.phi = 0.61595;  % right-left phase difference (it has to always be equal to 1.2319/2 seconds)
-            
+            model.dt_0 = dt_0;    % controller update referesh rate
+
             model.exo_enable = 1; % add exo to the simulation
             model.mus_enable = 0; % add muscles to the simulations
     
@@ -56,7 +56,7 @@ classdef Exo_Model < handle
             model.sat = 1*[500 500 500 500 500 500 500];                              % internal controller saturation level
     
             % Set initial states
-            model.ref = ref; % get the reference trajectory 
+            model.ref = href; % get the reference trajectory 
             for m = 1:6
                 if ismember(m,[4,5,6])  % for the left leg we have phi instead of phase 
                     % because we are using the same trajectory for the left leg as we
@@ -84,13 +84,13 @@ classdef Exo_Model < handle
             end
 
             % Get a fresh OpenSim model
-            model.Reset();
+            model.Reset(T);
         end
 
         % Resets the OpenSim model's position
         % Reset every variable changed during simulation
-        function Reset(model)
-            model.T = 60;           % simulation period
+        function Reset(model, T)
+            model.T = T;           % simulation period
             % get instance form Human_Exo class and call it sub
             model.sub = Human_Exo_v02(model.x0,model.v0,model.updT,model.p_gain,model.d_gain,model.sat,model.pelvis_stiffness,model.pelvis_damping,model.exo_enable, model.mus_enable);
         end
@@ -114,18 +114,14 @@ classdef Exo_Model < handle
         end
 
         % Run and open the OpenSim walking simulation
-        function Simulate(model)
-            for i = 1:(model.T/model.dt_0)+1
-                % compute simulation time
-                t = (i-1) * model.dt_0; 
-                % compute each leg's gait cycle and 
-                [s_l,s_r,r_human] = GaitGen(model, t, model.ref, model.motorSet, model.phase, model.phi); 
-                % update the model for one step by passing the reference trajectory to
-                % the system. We pass the reference trajectory to the system because
-                % the iternal controllers of the system needs that. It actually sets the
-                % rest length for each joints spring. 
-                model.sub.step(t+model.dt_0, model.f_exo, model.activation, r_human);
-            end
+        function Simulate(model, t)
+            % compute each leg's gait cycle and 
+            [s_l,s_r,r_human] = GaitGen(model, t, model.ref, model.motorSet, model.phase, model.phi); 
+            % update the model for one step by passing the reference trajectory to
+            % the system. We pass the reference trajectory to the system because
+            % the iternal controllers of the system needs that. It actually sets the
+            % rest length for each joints spring. 
+            model.sub.step(t + model.dt_0, model.f_exo, model.activation, r_human);
         end
 
         % Return model state variables
