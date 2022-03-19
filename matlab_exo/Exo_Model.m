@@ -33,9 +33,7 @@ classdef Exo_Model < handle
     end
     methods
         % Constructor
-        function model = Exo_Model()
-            load href_new;
-
+        function model = Exo_Model(ref)
             % Constants and params:
             model.motorSet = {'hip_r','knee_r','ankle_r','hip_l','knee_l','ankle_l','back'};
             model.muscleSet = {'hamstrings_r','bifemsh_r','glut_max_r','iliopsoas_r','rect_fem_r','vasti_r','gastroc_r','soleus_r','tib_ant_r','hamstrings_l','bifemsh_l','glut_max_l','iliopsoas_l','rect_fem_l','vasti_l','gastroc_l','soleus_l','tib_ant_l'};
@@ -58,7 +56,7 @@ classdef Exo_Model < handle
             model.sat = 1*[500 500 500 500 500 500 500];                              % internal controller saturation level
     
             % Set initial states
-            model.ref = href; % get the reference trajectory 
+            model.ref = ref; % get the reference trajectory 
             for m = 1:6
                 if ismember(m,[4,5,6])  % for the left leg we have phi instead of phase 
                     % because we are using the same trajectory for the left leg as we
@@ -128,6 +126,11 @@ classdef Exo_Model < handle
                 % rest length for each joints spring. 
                 model.sub.step(t+model.dt_0, model.f_exo, model.activation, r_human);
             end
+        end
+
+        % Return model state variables
+        function desc = GetStateDesc(model)
+            desc = model.sub.getOutPut();
         end
     end
 end
