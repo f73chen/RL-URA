@@ -69,13 +69,13 @@ classdef QLearningController < handle
                     q.actions(j) = randi(5);
                 end
                 switch q.actions(j)
-                    case 1      % Increase kp by 5%
+                    case 1
                         q.kp(j) = q.kp(j) * 1.05;
-                    case 2      % Decrease kp by 5%
+                    case 2
                         q.kp(j) = q.kp(j) * 0.95;
-                    case 3      % Increase kd by 5%
+                    case 3
                         q.kd(j) = q.kd(j) * 1.05;
-                    case 4      % Decrease kd by 5%
+                    case 4
                         q.kd(j) = q.kd(j) * 0.95;
                     % Otherwise no change
                 end
